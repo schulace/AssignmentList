@@ -41,5 +41,24 @@ router.post('/posts/:id', function (req, res) {
         res.send({score: dbres.rows[0].score});
     })
 });
+router.post('/posts', function (req, res) {
+    const body = req.body;
+    const title = body.title;
+    const message = body.message;
+    res.responseType = 'application/json';
+    if (title == null || title == '' || title.length > 50 || message == null || message == '') {
+        res.status = 401;
+        res.redirect('/')
+    } else {
+        db.query('insert into posts(title, body, score) values($1, $2, 0) returning id as id', [title, message],
+            (err, dbres) => {
+                if (err) {
+                    console.log(err);
+                }
+                res.redirect('/');
+            }
+        );
+    }
+});
 
 module.exports = router;
