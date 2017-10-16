@@ -12,16 +12,15 @@ router.post('/newuser', function (req, res, next) {
     console.log("creating new user");
     const body = req.body;
     const email = body.email;
-    const name = body.name;
     const pass = body.password;
     bcrypt.hash(pass, 10, (err, hash) => {
         console.log("hashed");
-        db.query('insert into users(name, pass_hash, email) values($1, $2, $3)', [name, hash, email], (err, dbres) => {
+        db.query('insert into users(email, pass_hash) values($1, $2)', [email, hash], (err, dbres) => {
             console.log("queried");
             if (err) {
                 console.error(err);
                 res.status(500);
-                res.send('an error occurred. there\'s probably a user with the same name or email')
+                res.send('an error occurred. there\'s probably a user with the same email')
             } else {
                 res.send("success")
             }

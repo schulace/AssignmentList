@@ -1,28 +1,35 @@
 CREATE TABLE IF NOT EXISTS users (
-userid    SERIAL PRIMARY KEY,
-name      VARCHAR(30) NOT NULL UNIQUE,
-pass_hash varchar,
-email     VARCHAR(40) NOT NULL UNIQUE
+  user_id   SERIAL PRIMARY KEY,
+  email     VARCHAR(40) NOT NULL UNIQUE,
+  pass_hash VARCHAR
 );
-CREATE TABLE IF NOT EXISTS posts (
-postid SERIAL PRIMARY KEY,
-userid INTEGER,
-title  VARCHAR(50) NOT NULL,
-body   TEXT        NOT NULL,
-time   DATE DEFAULT current_timestamp,
-FOREIGN KEY (userid) REFERENCES users);
-CREATE TABLE IF NOT EXISTS votes (
-direction INTEGER NOT NULL,
-time      DATE DEFAULT current_timestamp,
-userid    INTEGER,
-postid    INTEGER,
-CHECK (direction = -1 OR direction = 1),
-FOREIGN KEY (postid) REFERENCES posts,
-FOREIGN KEY (userid) REFERENCES users);
-CREATE TABLE IF NOT EXISTS comments (
-postid     INTEGER,
-userid      INTEGER,
-time        DATE DEFAULT current_timestamp,
-usercomment TEXT,
-FOREIGN KEY (postid) REFERENCES posts,
-FOREIGN KEY (userid) REFERENCES users);
+CREATE TABLE IF NOT EXISTS classes (
+  class_id   SERIAL PRIMARY KEY,
+  class_name VARCHAR(40) NOT NULL
+);
+-- CREATE TYPE subtask as ( task varchar(50),
+--     completed boolean
+-- );
+CREATE TABLE IF NOT EXISTS assignments (
+  assignment_id SERIAL PRIMARY KEY,
+  class_id      INTEGER,
+  title         VARCHAR(50)  NOT NULL,
+  comment       VARCHAR(128) NOT NULL,
+  duedate       DATE,
+  completed     BOOLEAN,
+  FOREIGN KEY (class_id) REFERENCES classes
+);
+CREATE TABLE IF NOT EXISTS takes (
+  class_id INTEGER,
+  user_id  INTEGER,
+  FOREIGN KEY (class_id) REFERENCES classes,
+  FOREIGN KEY (user_id) REFERENCES users
+);
+CREATE TABLE IF NOT EXISTS subtask (
+  assignment_id INTEGER,
+  task          VARCHAR(100),
+  completed     BOOLEAN,
+  duedate       DATE,
+  PRIMARY KEY (assignment_id, task),
+  FOREIGN KEY (assignment_id) REFERENCES assignments
+);

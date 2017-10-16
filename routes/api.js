@@ -8,70 +8,76 @@ const loginChecker = require('./../LoginSessions');
 
 //uncomment to check if people are logged in
 router.use(loginChecker.check_login);
-router.get('/posts', function (req, res) {
+router.get('/assignments', function (req, res) {
     res.responseType = 'application/json';
+    let email = req.cookies.email;
     //console.log('got request for posts: ' + JSON.stringify(req));
-    db.query('select u.name as poster, coalesce(sum(votes.direction), 0) as score, u.title as title, u.postid as id from ( SELECT name, postid, title FROM posts NATURAL JOIN users ) as u left outer join votes using(postid) group by u.name, u.title, u.postid order by score desc;', [], (err, dbres) => {
+    db.query('select title, duedate, completed, class_name, assignment_id from assignments natural join users natural join takes natural join classes where email=$1', [email], (err, dbres) => {
         if (err) {
             console.err(err.message);
-            res.send('db not available');
+            res.responseType = 'application/json';
+            res.send({error:'db not available'});
             return;
         }
         res.responseType = 'application/json';
         res.send(dbres.rows);
     });
 });
-router.get('/posts/:id', function (req, res) {
+router.get('/subtasks/:id', function (req, res) {
     const id = req.params.id;
     res.responseType = 'application/json';
-    db.query('select postid as id, title, body, name from posts natural join users where postid=$1', [id], (err, dbres) => {
-        if (err || !dbres.rows[0]) {
+    db.query('select * from subtask where assignment_id = $1', [id], (err, dbres) => {
+        if (err) {
             console.log(err);
             res.status(500);
-            res.send('error');
-        }
-        db.query('select name, usercomment from users natural join comments where postid=$1', [id], (err, dbres2) => {
+            res.send({error:'error'});
+        } else {
             res.responseType = 'application/json';
-            res.status(200);
-            let retval = {
-                postInfo: dbres.rows[0],
-                postComments: dbres2.rows
-            };
-            res.send(retval);
+            res.send(dbres.rows);
+        }
+    });
+});
+//completing
+router.put('/assignments/:id', function (req, res, next) {
+    const id = req.params.id;
+    const tick = req.body.value;
+    //this will always exist because its required for login, which has happened at this point
+    db.getClient((err, client, finish) => {
+        res.responseType = 'application/json';
+        if(err) {
+            console.log(err);
+            next(err);
+        } 
+        client.query('update assignments set completed=$1 where assignment_id=$2', [tick, id], (err, dbres) =>{
+            if(err) {
+                console.log(err);
+                next(err);
+            }
+            client.query('update subtask set completed=$1 where assignment_id=$2', [tick, id], (err, dbres2) => {
+                if(err) {
+                    console.log(err);
+                    next(err);
+                }
+                res.status(200);
+                res.send({completed:true});
+                finish(); //returning client to pool
+            });
         });
     });
 });
-//voting
-router.put('/posts/:id', function (req, res) {
-    const id = req.params.id;
+router.post('/class', function(req, res) {
     const body = req.body;
-    //this will always exist because its required for login, which has happened at this point
-    const email = req.cookies.email;
-    const direction = body.direction == 'up' ? 1 : -1;
-    db.query('select direction, userid from votes where postid = $1 and userid = (select userid from users where email=$2);', [id, email], (err, dbres) => {
-        if (err) {
+    const className = body.className;
+    res.responseType = 'application/json';
+    db.getClient((err, client, finish) => {
+        if(err) {
             console.log(err);
-            res.send('error');
+            next(err);
         }
-        if (!dbres[0]) {
-            db.query('insert into votes(userid, postid, direction) values(select userid from users where email=$1), $2, $3)', [email, id, direction], (err, dbres) => {
-                if (err) {
-                    console.log(err);
-                    res.send(0);
-                } else {
-                    res.send({score: direction})
-                }
-            });
-        }
-        if (dbres[0].direction == direction) {
-            res.type('application/json');
-            res.send({score: 0});
-        } else {
+    });
 
-        }
-    })
 });
-router.post('/posts', function (req, res) {
+router.post('/assignments', function (req, res) {
     const body = req.body;
     const title = body.title;
     const message = body.message;
@@ -90,5 +96,4 @@ router.post('/posts', function (req, res) {
         );
     }
 });
-
 module.exports = router;

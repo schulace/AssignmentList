@@ -19,6 +19,7 @@ module.exports = {
         pool.connect((err, client, done) => {
             const timeout = setTimeout(() => {
                 console.error('connection has been open for waaaaay too long');
+                done();
             }, 5000);
             const finish = () => {
                 clearTimeout(timeout);
