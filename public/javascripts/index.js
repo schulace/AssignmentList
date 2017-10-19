@@ -2,58 +2,45 @@
  * Created by schulace on 9/18/17.
  */
 const pageModule = angular.module('postsPage', []);
-pageModule.controller('postsListController', ['$scope', function ($scope) {
-    $scope.view = {loggedIn:false}
-    $scope.populate = function () {
-        $.ajax('/api/posts', {
-            method: 'GET',
-            success: function (data) {
-                $scope.$apply(function () {
-                    $scope.posts = data;
-                    $scope.view.loggedIn = true;
-                })
-            },
-            error: () => {
-                alert('log in to see posts');
-                $scope.view.loggedIn = false;
-            }
+/**
+ * throwing some error. can't find it
+ */
+pageModule.factory('pgdata', function($http) {
+    this.assignments = [];
+    this.loggedIn = false;
+    this.populate = function() {
+        $http({
+            url:'/api/assignments',
+            method:'GET',
+            responseType:'json'
+        }).then(function(data) {
+            this.assignments=data;
+            this.loggedIn=true;
+        }).catch(function(err) {
+            this.loggedIn=false;
+            alert('not logged in')
         });
-    };
-    $scope.vote = function (evt) {
-        const elem = $(evt.target);
-        const direction = elem.text() == 'up' ? 1 : -1;
-        const id = elem.parent().parent().data('value');
-        $.ajax('/api/posts/' + id, {
-            method: 'PUT',
-            type: 'json',
-            data: {direction: direction},
-            //serverside call will send an object with the score
-            success: (data) => $scope.apply(function () {
-                $scope.posts.foreach(function (post) {
-                    if (post.id == id) {
-                        post.score += data.score;
-                    }
-                })
-            })
-        });
-    };
-    $scope.login = function (valid) {
-        console.log($scope.formdata);
-        $.ajax('/login', {
-            method: 'POST',
-            type: 'json',
-            data: $scope.formdata,
-            success: function (data) {
-                $scope.populate();
+    }
+});
+pageModule.controller('loginController', function($scope, $http, pgdata){
+    $scope.login = function () {
+        $http({
+            url:'/login',
+            method:'POST',
+            responseType:'json',
+            data: $scope.formdata
+        }).then(
+            function(data){
+                pgdata.populate;
             },
-            error: function (data) {
+            function(err){
                 alert('login failed')
-            }
-        })
-    };
+            })
+    }
     $scope.formdata = {
         email:'',
         password:''
     };
-    $scope.populate();
-}]);
+    $scope.show=!pgdata.loggedIn;
+    pgdata.populate();
+});

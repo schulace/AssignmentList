@@ -10,25 +10,9 @@
 </head>
 <body>
 <div class="container-fluid">
-    <div class="row" ng-controller="postsListController as ctrl">
-        <div class="col-sm-9" >
-            <table class="table">
-                <tr ng-repeat="post in posts" data-value="{{post.id}}">
-                    <td>
-                        <button ng-click="ctrl.vote($event)" class="btn">up</button>
-                        <div>{{post.score}}</div>
-                        <button ng-click="ctrl.vote($event)" class="btn">down</button>
-                    </td>
-                    <td>
-                        <div>{{post.title}}</div>
-                    </td>
-                    <td>
-                        <div>{{post.poster}}</div>
-                    </td>
-                </tr>
-            </table>
-        </div>
-        <div class="col-sm-3" ng-hide="view.loggedIn">
+    <div class="row">
+        <div class="col-sm-7">hi</div>
+        <div class="col-sm-3" ng-show="loginController.show" ng-controller='loginController'>
             <span>login box</span>
             <form name="loginForm" novalidate>
                 <div class="form-group">

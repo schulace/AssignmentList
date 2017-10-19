@@ -91,7 +91,7 @@ router.post('/class', function(req, res) {
                 finish();
             }
         };
-        async doDb();
+        doDb();
     });
 
 });
