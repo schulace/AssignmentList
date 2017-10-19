@@ -2,7 +2,6 @@
 <html lang="en" ng-app="postsPage">
 <head>
     <meta charset="UTF-8">
-    <script src="./javascripts/jquery.min.js"></script>
     <script src="javascripts/angular.min.js"></script>
     <script src="javascripts/index.js"></script>
     <link rel="stylesheet" href="./stylesheets/bootstrap.min.css">
@@ -12,7 +11,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm-7">hi</div>
-        <div class="col-sm-3" ng-show="loginController.show" ng-controller='loginController'>
+        <div class="col-sm-3" ng-show='!loggedIn()' ng-controller='loginController'>
             <span>login box</span>
             <form name="loginForm" novalidate>
                 <div class="form-group">
@@ -20,7 +19,6 @@
                     <input class="form-control" id="usernameInput" type="email" name="email" ng-model="formdata.email" required>
                     <div class="alert-danger" ng-show="!loginForm.email.$pristine && !loginForm.email.$valid">not a valid email address</div>
                 </div>
-
                 <div class="form-group">
                     <label for="passwordInput">password:</label>
                     <input class="form-control" id="passwordInput" type="password" name="password" ng-model="formdata.password" required>

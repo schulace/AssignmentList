@@ -5,21 +5,27 @@ const pageModule = angular.module('postsPage', []);
 /**
  * throwing some error. can't find it
  */
-pageModule.factory('pgdata', function($http) {
-    this.assignments = [];
-    this.loggedIn = false;
-    this.populate = function() {
+pageModule.service('pgdata', function($http) {
+    let $scope = this;
+    $scope.assignments = [];
+    $scope.loggedIn = false;
+    $scope.populate = function() {
         $http({
             url:'/api/assignments',
             method:'GET',
             responseType:'json'
         }).then(function(data) {
-            this.assignments=data;
-            this.loggedIn=true;
-        }).catch(function(err) {
-            this.loggedIn=false;
+            $scope.assignments=data;
+            alert('call went through successfully');
+            console.log(data);
+            $scope.loggedIn=true;
+        }, function(err) {
+            $scope.loggedIn=false;
             alert('not logged in')
         });
+    }
+    $scope.getLoggedIn = function() {
+        return $scope.loggedIn;
     }
 });
 pageModule.controller('loginController', function($scope, $http, pgdata){
@@ -31,7 +37,7 @@ pageModule.controller('loginController', function($scope, $http, pgdata){
             data: $scope.formdata
         }).then(
             function(data){
-                pgdata.populate;
+                pgdata.populate();
             },
             function(err){
                 alert('login failed')
@@ -41,6 +47,6 @@ pageModule.controller('loginController', function($scope, $http, pgdata){
         email:'',
         password:''
     };
-    $scope.show=!pgdata.loggedIn;
+    $scope.loggedIn = pgdata.getLoggedIn;
     pgdata.populate();
 });
