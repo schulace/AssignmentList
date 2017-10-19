@@ -65,6 +65,7 @@ router.put('/assignments/:id', function (req, res, next) {
         });
     });
 });
+//creating a new class. so far untested
 router.post('/class', function(req, res) {
     const body = req.body;
     const className = body.className;
@@ -74,6 +75,23 @@ router.post('/class', function(req, res) {
             console.log(err);
             next(err);
         }
+        const doDb = async () => {
+            try {
+                await client.query('BEGIN');
+                const dbres = await client.query('insert into classes(class_name) values($1) returning class_id', [className]);
+                await client.query('insert into takes(class_id, user_id) values($1, (select user_id from users where email=$2))', [dbres.rows[0], req.cookies.email]); 
+                await client.query('COMMIT');
+                res.status=200;
+                res.send('success');
+            } catch (err) {
+                client.query('ROLLBACK');
+                res.status=400;
+                res.send('fail');
+            } finally {
+                finish();
+            }
+        };
+        async doDb();
     });
 
 });

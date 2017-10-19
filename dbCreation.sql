@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS assignments (
   assignment_id SERIAL PRIMARY KEY,
   class_id      INTEGER,
   title         VARCHAR(50)  NOT NULL,
-  comment       VARCHAR(128) NOT NULL,
+  comment       VARCHAR(128),
   duedate       DATE,
   completed     BOOLEAN,
   FOREIGN KEY (class_id) REFERENCES classes
@@ -23,7 +23,8 @@ CREATE TABLE IF NOT EXISTS takes (
   class_id INTEGER,
   user_id  INTEGER,
   FOREIGN KEY (class_id) REFERENCES classes,
-  FOREIGN KEY (user_id) REFERENCES users
+  FOREIGN KEY (user_id) REFERENCES users,
+  PRIMARY KEY (user_id, class_id)
 );
 CREATE TABLE IF NOT EXISTS subtask (
   assignment_id INTEGER,
