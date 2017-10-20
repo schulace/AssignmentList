@@ -33,7 +33,7 @@ router.post('/login', function(req, res, next) {
     const password = body.password;
     console.log('tried to log in')
     db.query('select pass_hash from users where email=$1', [email], (err, dbres) => {
-        if(dbres.rows[0]) {
+        if(!err) {
             bcrypt.compare(password, dbres.rows[0].pass_hash, (err, result) => {
                 if(result) {
                     logIn.login(email, res);
@@ -43,6 +43,8 @@ router.post('/login', function(req, res, next) {
                     res.send("auth failed");
                 }
             });
+        } else {
+            next(err);
         }
     });
 });

@@ -10,8 +10,17 @@
 <body>
 <div class="container-fluid">
     <div class="row">
-        <div class="col-sm-7">hi</div>
-        <div class="col-sm-3" ng-show='!loggedIn()' ng-controller='loginController'>
+        <div class="col-sm-7">
+            <h1>
+                your assignments:
+            </h1>
+            <div ng-controller='assignmentsController'>
+                <div ng-repeat='item in assignments'>
+                    title is {{item}}
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3" ng-show='!loggedIn' ng-controller='loginController'>
             <span>login box</span>
             <form name="loginForm" novalidate>
                 <div class="form-group">

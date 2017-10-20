@@ -12,12 +12,14 @@ CREATE TABLE IF NOT EXISTS classes (
 -- );
 CREATE TABLE IF NOT EXISTS assignments (
   assignment_id SERIAL PRIMARY KEY,
+  user_id       INTEGER,
   class_id      INTEGER,
   title         VARCHAR(50)  NOT NULL,
   comment       VARCHAR(128),
   duedate       DATE,
   completed     BOOLEAN,
-  FOREIGN KEY (class_id) REFERENCES classes
+  FOREIGN KEY (class_id) REFERENCES classes,
+  FOREIGN KEY (user_id) REFERENCES users
 );
 CREATE TABLE IF NOT EXISTS takes (
   class_id INTEGER,

@@ -7,28 +7,45 @@ const pageModule = angular.module('postsPage', []);
  */
 pageModule.service('pgdata', function($http) {
     let $scope = this;
-    $scope.assignments = [];
-    $scope.loggedIn = false;
+    $scope.assignments = {
+        data:[],
+        observers:[]
+    };
+    $scope.addObserver = function(field, observer) {
+        const variable = $scope[field]
+        if(variable) {
+            variable.observers.push(observer)
+            observer(variable.data);
+        }
+    };
+    $scope.loggedIn = {
+        data:false,
+        observers:[]
+    }
     $scope.populate = function() {
         $http({
             url:'/api/assignments',
             method:'GET',
             responseType:'json'
-        }).then(function(data) {
-            $scope.assignments=data;
-            alert('call went through successfully');
-            console.log(data);
-            $scope.loggedIn=true;
+        }).then(function(res) {
+            $scope.set('assignments', res.data);
+            console.log(res);
+            $scope.set('loggedIn', true);
         }, function(err) {
-            $scope.loggedIn=false;
+            $scope.set('loggedIn', false);
             alert('not logged in')
         });
     }
-    $scope.getLoggedIn = function() {
-        return $scope.loggedIn;
+    $scope.set = function(str, val) {
+        let v = $scope[str];
+        if(v) {
+            v.data = val;
+            console.log(v);
+            v.observers.forEach(cb => cb(v.data));
+        }
     }
 });
-pageModule.controller('loginController', function($scope, $http, pgdata){
+pageModule.controller('loginController', function($scope, $http, pgdata) {
     $scope.login = function () {
         $http({
             url:'/login',
@@ -47,6 +64,15 @@ pageModule.controller('loginController', function($scope, $http, pgdata){
         email:'',
         password:''
     };
-    $scope.loggedIn = pgdata.getLoggedIn;
+    $scope.loggedIn = false;
+    pgdata.addObserver('loggedIn', function(newval) {
+        $scope.loggedIn = newval;
+    });
     pgdata.populate();
+});
+pageModule.controller('assignmentsController', function($scope, pgdata) {
+    $scope.assignments = pgdata.assignments;
+    pgdata.addObserver('assignments', function(newval) {
+        $scope.assignments = newval;
+    })
 });
