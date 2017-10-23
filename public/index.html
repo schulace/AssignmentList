@@ -1,40 +1,50 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="postsPage">
+<html lang='en' ng-app='postsPage'>
 <head>
-    <meta charset="UTF-8">
-    <script src="javascripts/angular.min.js"></script>
-    <script src="javascripts/index.js"></script>
-    <link rel="stylesheet" href="./stylesheets/bootstrap.min.css">
+    <meta charset='UTF-8'>
+    <script src='javascripts/angular.min.js'></script>
+    <script src='javascripts/index.js'></script>
+    <link rel='stylesheet' href='./stylesheets/bootstrap.min.css'>
     <title>title</title>
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-sm-7">
+<div class='container-fluid'>
+    <div class='row'>
+        <div class='col-sm-7'>
             <h1>
                 your assignments:
             </h1>
             <div ng-controller='assignmentsController'>
-                <div ng-repeat='item in assignments'>
-                    title is {{item}}
-                </div>
+                <table class='table'>
+                    <tr ng-repeat='item in assignments'>
+                        <td>
+                            <input type='checkbox' value='{{item.completed}}'>
+                        </td>
+                        <td>
+                            {{item.title}}
+                        </td>
+                        <td>
+                            {{item.class_name}}
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
-        <div class="col-sm-3" ng-show='!loggedIn' ng-controller='loginController'>
+        <div class='col-sm-3' ng-show='!loggedIn' ng-controller='loginController'>
             <span>login box</span>
-            <form name="loginForm" novalidate>
-                <div class="form-group">
-                    <label for="usernameInput">email:</label>
-                    <input class="form-control" id="usernameInput" type="email" name="email" ng-model="formdata.email" required>
-                    <div class="alert-danger" ng-show="!loginForm.email.$pristine && !loginForm.email.$valid">not a valid email address</div>
+            <form name='loginForm' novalidate>
+                <div class='form-group'>
+                    <label for='usernameInput'>email:</label>
+                    <input class='form-control' id='usernameInput' type='email' name='email' ng-model='formdata.email' required>
+                    <div class='alert-danger' ng-show='!loginForm.email.$pristine && !loginForm.email.$valid'>not a valid email address</div>
                 </div>
-                <div class="form-group">
-                    <label for="passwordInput">password:</label>
-                    <input class="form-control" id="passwordInput" type="password" name="password" ng-model="formdata.password" required>
-                    <div  class="alert-danger" ng-show="!loginForm.password.$pristine && !loginForm.password.$valid">invalid password</div>
+                <div class='form-group'>
+                    <label for='passwordInput'>password:</label>
+                    <input class='form-control' id='passwordInput' type='password' name='password' ng-model='formdata.password' required>
+                    <div  class='alert-danger' ng-show='!loginForm.password.$pristine && !loginForm.password.$valid'>invalid password</div>
                 </div>
-                <div class="form-group">
-                    <input type="button" value="log in" ng-click="login()" class="btn" ng-disabled="!loginForm.$valid">
+                <div class='form-group'>
+                    <input type='button' value='log in' ng-click='login()' class='btn' ng-disabled='!loginForm.$valid'>
                 </div>
             </form>
         </div>
