@@ -1,0 +1,36 @@
+{
+    "env": {
+        "browser": true,
+        "es6": true,
+        "node": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+        "sourceType": "module",
+        "ecmaVersion":8
+    },
+    "rules": {
+        "indent": [
+            1,
+            4
+        ],
+        "linebreak-style": [
+            "error",
+            "unix"
+        ],
+        "quotes": [
+            1,
+            "single"
+        ],
+        "semi": [
+            1,
+            "always"
+        ],
+        "no-console": [ 
+            0
+        ],
+        "no-unused-vars":[
+            1
+        ]
+    }
+}

@@ -22,5 +22,8 @@
     "pg": "^7.3.0",
     "postgresql": "0.0.1",
     "serve-favicon": "~2.3.0"
+  },
+  "devDependencies": {
+    "eslint-config-google": "^0.9.1"
   }
 }

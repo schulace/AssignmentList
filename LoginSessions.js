@@ -11,7 +11,6 @@ module.exports = {
         let hash = req.cookies.hash;
         console.log(req.cookies);
         if ((login_table[email] === hash) && email && hash) {
-            console.log('the login worked');
             next();
         } else {
             res.status(401);

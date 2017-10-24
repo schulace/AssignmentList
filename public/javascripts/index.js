@@ -55,13 +55,32 @@ pageModule.controller('loginController', function($scope, $http, pgdata) {
     });
     pgdata.populate();
 });
-pageModule.controller('assignmentsController', function($scope, pgdata) {
+pageModule.controller('assignmentsController', function($scope, $http, pgdata) {
     $scope.assignments = pgdata.assignments;
-    $scope.$watch(() => pgdata, function(newval) {
+    $scope.$watch(() => pgdata.assignments, function(newval) {
         console.log('watch for assignments, ' + JSON.stringify(newval));
         $scope.assignments = newval;
     }, true);
 });
-pageModule.controller('profileController', function($scipe, pgdata) {
-    //TODO add create a thing to add / drop classes
+pageModule.controller('assignmentController', function($scope, $http, pgdata){
+    $scope.item = pgdata.assignments[$scope.$index];
+    $scope.update = function() {
+        console.log('completed is ', $scope.item.completed);
+        $http({
+            url:'/api/assignments/' + $scope.item.assignment_id,
+            method:'PUT',
+            responseType:'json',
+            data:{
+                tick:$scope.item.completed
+            }
+        }).then(function (res) {
+            console.log('updated');
+        }, function(err) {
+            $scope.item.completed = !$scope.item.completed;
+            alert('unable to connect to server');
+        });
+    };
+});
+pageModule.controller('profileController', function($scope, pgdata) {
+    //TODO create a thing to add / drop classes
 });

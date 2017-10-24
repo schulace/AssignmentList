@@ -16,9 +16,9 @@
             </h1>
             <div ng-controller='assignmentsController'>
                 <table class='table'>
-                    <tr ng-repeat='item in assignments.assignments'>
+                    <tr ng-repeat='item in assignments track by $index' ng-controller='assignmentController'>
                         <td>
-                            <input type='checkbox' value='{{item.completed}}'>
+                            <input type='checkbox' ng-model='item.completed' ng-change='update()'>
                         </td>
                         <td>
                             {{item.title}}

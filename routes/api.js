@@ -40,33 +40,37 @@ router.get('/subtasks/:id', function (req, res) {
 //completing
 router.put('/assignments/:id', function (req, res, next) {
     const id = req.params.id;
-    const tick = req.body.value;
+    const tick = req.body.tick;
     //this will always exist because its required for login, which has happened at this point
+    console.log('tick is ', tick, '\nid is ', id);
     db.getClient((err, client, finish) => {
         res.responseType = 'application/json';
         if(err) {
             console.log(err);
             next(err);
+            return;
         } 
         client.query('update assignments set completed=$1 where assignment_id=$2', [tick, id], (err, dbres) =>{
             if(err) {
                 console.log(err);
                 next(err);
+                return;
             }
             client.query('update subtask set completed=$1 where assignment_id=$2', [tick, id], (err, dbres2) => {
                 if(err) {
                     console.log(err);
                     next(err);
+                    return;
                 }
                 res.status(200);
-                res.send({completed:true});
+                res.send({completed:tick});
                 finish(); //returning client to pool
             });
         });
     });
 });
 //creating a new class. so far untested
-router.post('/class', function(req, res) {
+router.post('/class', function(req, res, next) {
     const body = req.body;
     const className = body.className;
     res.responseType = 'application/json';
@@ -102,14 +106,15 @@ router.post('/assignments', function (req, res) {
     res.responseType = 'application/json';
     if (title == null || title == '' || title.length > 50 || message == null || message == '') {
         res.status = 401;
-        res.redirect('/')
+        res.redirect('/');
     } else {
         db.query('insert into posts(title, body, score) values($1, $2, 0) returning id as id', [title, message],
             (err, dbres) => {
                 if (err) {
                     console.log(err);
                 }
-                res.redirect('/');
+                res.status(200);
+                res.send(dbres.rows[0].id);
             }
         );
     }
