@@ -50,23 +50,25 @@ router.put('/assignments/:id', function (req, res, next) {
             next(err);
             return;
         } 
-        client.query('update assignments set completed=$1 where assignment_id=$2', [tick, id], (err, dbres) =>{
-            if(err) {
-                console.log(err);
-                next(err);
-                return;
-            }
-            client.query('update subtask set completed=$1 where assignment_id=$2', [tick, id], (err, dbres2) => {
-                if(err) {
-                    console.log(err);
-                    next(err);
-                    return;
+        const dbfunc = async () => {
+            try {
+                //security check to make sure some1 doesn't just modify the URL and change data that's not theirs
+                const res1 = await client.query('select email from users natural join takes natural join assignments where assignment_id=$1', [id]);
+                if(!res1.rows[0] || res1.rows[0].email !== req.cookies.email) {
+                    res.status=401;
+                    throw new Error('unauthorized');
                 }
+                await client.query('update assignments set completed=$1 where assignment_id=$2', [tick, id]);
+                await client.query('update subtask set completed=$1 where assignment_id=$2', [tick, id]);
                 res.status(200);
                 res.send({completed:tick});
-                finish(); //returning client to pool
-            });
-        });
+            } catch(err) {
+                next(err);
+            } finally {
+                finish();
+            }
+        };
+        dbfunc();
     });
 });
 //creating a new class. so far untested
