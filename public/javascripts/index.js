@@ -3,14 +3,10 @@
  */
 const pageModule = angular.module('postsPage', []);
 /**
- * this service uses a custom watcher thing I set up
- * everything that wants data from the service calls
- * addObserver with the string of the field they want
- * and a callback taking 1 argument. in order to set
- * a value in the service, call set with the variable's
- * name and the value. This will then run all callbacks
- * bound to the variable's name, and the callbacks
- * handle updating values in the fields they run from.
+ *  a holder for the relevant info. will remain mostly
+ *  in sync with the backend postgres db so that on updates,
+ *  we don't need to fetch entire lists, we can just update
+ *  things in this table
 */
 pageModule.service('pgdata', ['$http', function($http) {
     let $scope = this;
@@ -30,6 +26,7 @@ pageModule.service('pgdata', ['$http', function($http) {
             alert('not logged in');
         });
     }; 
+    $scope.email = '';
 }]);
 pageModule.controller('loginController', function($scope, $http, pgdata) {
     $scope.login = function () {
@@ -41,14 +38,19 @@ pageModule.controller('loginController', function($scope, $http, pgdata) {
         }).then(
             function(data){
                 pgdata.populate();
+                pgdata.email = $scope.formdata.email;
             },
             function(err){
-                alert('login failed');
+                if(err.status === 500) {
+                    alert('login server down');
+                } else {
+                    alert('login failed');
+                }
             });
     }; 
     $scope.formdata = {
-        email:'',
-        password:''
+        email:'ajs520@lehigh.edu',
+        password:'password' //temp lol
     };
     $scope.$watch(() =>pgdata.loggedIn, function(newval, oldval) {
         $scope.loggedIn = newval;
@@ -82,5 +84,8 @@ pageModule.controller('assignmentController', function($scope, $http, pgdata){
     };
 });
 pageModule.controller('profileController', function($scope, pgdata) {
-    //TODO create a thing to add / drop classes
+    $scope.email = pgdata.email;
+    $scope.$watch(() => pgdata.email, function(nval) {
+        $scope.email = nval;
+    });
 });

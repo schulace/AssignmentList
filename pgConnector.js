@@ -2,14 +2,8 @@
  * Created by schulace on 9/18/17.
  */
 const {Pool} = require('pg');
-const pool = new Pool({
-    host:'localhost',
-    user:'alex',
-    max:3,
-    password:'schulace',
-    database:'postgres',
-    port:5432
-});
+const pool = new Pool();
+console.log(process.env.DATABASE_URL);
 
 module.exports = {
     query: (text, params, callback) => {
@@ -29,4 +23,4 @@ module.exports = {
             callback(err, client, finish);
         });
     }
-}
+};
