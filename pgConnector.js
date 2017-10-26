@@ -2,7 +2,15 @@
  * Created by schulace on 9/18/17.
  */
 const {Pool} = require('pg');
-const pool = new Pool();
+const {URL} = require('url');
+const dbURL = new URL(process.env.DATABASE_URL);
+const pool = new Pool({
+    user: dbURL.username,
+    host: dbURL.hostname,
+    database: dbURL.pathname.substring(1),
+    password: dbURL.password,
+    port: dbURL.port
+});
 console.log(process.env.DATABASE_URL);
 
 module.exports = {

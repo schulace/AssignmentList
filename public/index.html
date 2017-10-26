@@ -2,19 +2,35 @@
 <html lang='en' ng-app='postsPage'>
 <head>
     <meta charset='UTF-8'>
-    <script src='javascripts/angular.min.js' type='text/javascript'></script>
+    <!--bootstrap 4 css-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css">
+    <!--jquery-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!--bootstrap 4 js-->
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
+    <!--angular-->
+    <script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular.min.js'></script>
     <script src='javascripts/index.js' type='text/javascript'></script>
-    <link rel='stylesheet' href='./stylesheets/bootstrap.min.css' type='text/css'>
+
     <title>title</title>
 </head>
 <body>
 <div class='container-fluid'>
-    <div class='row'>
-        <div class='col-sm-7'>
-            <h1>
-                your assignments:
-            </h1>
-            <div ng-controller='assignmentsController'>
+    <div class="row" ng-controller='allController' ng-switch='loggedIn'>
+        <div class="col-sm-9">
+            <div ng-controller='assignmentsController' ng-switch-when='true'>
+                <div>
+                    <em>your assignments:</em>
+                </div>
+                <div>
+                    <button class="btn" type="button" ng-click="newAssignment()">new assignment</button>
+                    <!--bootstrap modal for new button-->
+                    <div id="addAssignmentModal" class="modal fade">
+                        //TODO implement
+                    </div>
+                </div>
                 <table class='table'>
                     <tr ng-repeat='item in assignments track by $index' ng-controller='assignmentController'>
                         <td>
@@ -29,30 +45,59 @@
                     </tr>
                 </table>
             </div>
-        </div>
-        <div class='col-sm-3' ng-show='!loggedInn' ng-controller='loginController'>
-            <div id="loginselector">
-                <ul class="nav navtabs">
-                    <li class='active' data-toggle="tab"><a href="#1">log in</a></li>
-                    <li data-toggle="tab"><a href="#2">sign up</a></li>
-                </ul>
+            <div ng-switch-when='false'>
+                <h1>//TODO</h1>
+                <div class="alert alert-info">this will eventually contain a description</div>
             </div>
-            <span>Log in:</span>
-            <form name='loginForm' novalidate>
-                <div class='form-group'>
-                    <label for='usernameInput'>email:</label>
-                    <input class='form-control' id='usernameInput' type='email' name='email' ng-model='formdata.email' required>
-                    <div class='alert-danger' ng-show='!loginForm.email.$pristine && !loginForm.email.$valid'>not a valid email address</div>
+        </div>
+        <div class='col-sm-3' ng-controller='loginController'>
+            <div class="container" id="loginselector" ng-switch-when='false'>
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-toggle="tab" href="#loginTab">log in</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#signupTab">sign up</a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div id="loginTab" class="tab-pane container fade show active">
+                        <form name='loginForm' novalidate>
+                            <div class='form-group'>
+                                <label for='usernameInput'>email:</label>
+                                <input class='form-control' id='usernameInput' type='email' name='email' ng-model='formdata.email' required>
+                                <div class='alert-danger' ng-show='!loginForm.email.$pristine && !loginForm.email.$valid'>not a valid email address</div>
+                            </div>
+                            <div class='form-group'>
+                                <label for='passwordInput'>password:</label>
+                                <input class='form-control' id='passwordInput' type='password' name='password' ng-model='formdata.password' required>
+                                <div  class='alert-danger' ng-show='!loginForm.password.$pristine && !loginForm.password.$valid'>invalid password</div>
+                            </div>
+                            <div class='form-group'>
+                                <input type='button' value='log in' ng-click='login()' class='btn' ng-disabled='!loginForm.$valid'>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="signupTab" class="tab-pane container fade">
+                        <form name="signupForm">
+                            <div class='form-group'>
+                                <label for='usernameInput'>email:</label>
+                                <input class='form-control' id='usernameInput' type='email' name='email' ng-model='formdata.email' required>
+                                <div class='alert-danger' ng-show='!signupForm.email.$pristine && !signupForm.email.$valid'>not a valid email address</div>
+                            </div>
+                            <div class='form-group'>
+                                <label for='passwordInput'>password:</label>
+                                <input class='form-control' id='passwordInput' type='password' name='password' ng-model='formdata.password' required>
+                                <div  class='alert-danger' ng-show='!signupForm.password.$pristine && !signupForm.password.$valid'>invalid password</div>
+                            </div>
+                            <div class='form-group'>
+                                <input type='button' value='sign up' ng-click='signup()' class='btn' ng-disabled='!signupForm.$valid'>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div class='form-group'>
-                    <label for='passwordInput'>password:</label>
-                    <input class='form-control' id='passwordInput' type='password' name='password' ng-model='formdata.password' required>
-                    <div  class='alert-danger' ng-show='!loginForm.password.$pristine && !loginForm.password.$valid'>invalid password</div>
-                </div>
-                <div class='form-group'>
-                    <input type='button' value='log in' ng-click='login()' class='btn' ng-disabled='!loginForm.$valid'>
-                </div>
-            </form>
+            </div>
+            <div class="container"><button class="btn btn-danger btn-block float-center" ng-click='logout()' ng-switch-when='true'>logout</button></div>
         </div>
     </div>
 </div>

@@ -18,9 +18,10 @@ module.exports = {
         }
     },
     logOut: (req) => {
-        const email = req.cookie('email');
-        if (email) {
-            login_table[email] = null;
+        const email = req.cookies.email;
+        const hash = req.cookies.hash;
+        if (login_table[email] == hash) {
+            delete login_table[email];
         }
     },
     login: (email, res) => {

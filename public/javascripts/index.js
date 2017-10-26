@@ -21,13 +21,19 @@ pageModule.service('pgdata', ['$http', function($http) {
         }).then(function(res) {
             $scope.assignments = res.data;
             $scope.loggedIn = true;
-        }, function(err) {
+        }, function() {
             $scope.loggedIn = false;
             alert('not logged in');
         });
     }; 
     $scope.email = '';
 }]);
+pageModule.controller('allController', function($scope, pgdata) {
+    $scope.loggedIn = pgdata.loggedIn;
+    $scope.$watch(() => pgdata.loggedIn, function(nval) {
+        $scope.loggedIn = nval;
+    });
+});
 pageModule.controller('loginController', function($scope, $http, pgdata) {
     $scope.login = function () {
         $http({
@@ -36,7 +42,7 @@ pageModule.controller('loginController', function($scope, $http, pgdata) {
             responseType:'json',
             data: $scope.formdata
         }).then(
-            function(data){
+            function(){
                 pgdata.populate();
                 pgdata.email = $scope.formdata.email;
             },
@@ -52,17 +58,44 @@ pageModule.controller('loginController', function($scope, $http, pgdata) {
         email:'ajs520@lehigh.edu',
         password:'password' //temp lol
     };
-    $scope.$watch(() =>pgdata.loggedIn, function(newval, oldval) {
+    $scope.$watch(() =>pgdata.loggedIn, function(newval) {
         $scope.loggedIn = newval;
     });
     pgdata.populate();
+    $scope.signup = function() {
+        $http({
+            url:'/newUser',
+            method:'POST',
+            responseType:'json',
+            data:$scope.formdata
+        }).then(function(){
+            alert('account successfully created');
+            $scope.login();
+        }, function(){
+            alert('error while creating account. try a different email');
+        });
+    };
+    $scope.logout = function() {
+        $http({
+            url:'/login',
+            method:'DELETE',
+        }).then(function() {
+            pgdata.loggedIn = false;
+        }, function(err) {
+            console.log(err);
+        });
+    };
 });
 pageModule.controller('assignmentsController', function($scope, $http, pgdata) {
     $scope.assignments = pgdata.assignments;
+    $scope.loggedIn = pgdata.loggedIn;
     $scope.$watch(() => pgdata.assignments, function(newval) {
         console.log('watch for assignments, ' + JSON.stringify(newval));
         $scope.assignments = newval;
     }, true);
+    $scope.$watch(() => pgdata.loggedIn, function(nv) {
+        $scope.loggedIn = nv;
+    });
 });
 pageModule.controller('assignmentController', function($scope, $http, pgdata){
     $scope.item = pgdata.assignments[$scope.$index];
@@ -75,9 +108,9 @@ pageModule.controller('assignmentController', function($scope, $http, pgdata){
             data:{
                 tick:$scope.item.completed
             }
-        }).then(function (res) {
+        }).then(function () {
             console.log('updated');
-        }, function(err) {
+        }, function() {
             $scope.item.completed = !$scope.item.completed;
             alert('unable to connect to server');
         });

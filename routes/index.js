@@ -48,4 +48,8 @@ router.post('/login', function(req, res, next) {
         }
     });
 });
+router.delete('/login', function(req,res,next) {
+    logIn.logOut(req);
+    res.send('logged out')
+})
 module.exports = router;
