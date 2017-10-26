@@ -29,7 +29,4 @@
   "engines" : {
       "node":"8.8.0"
   }
-  "engines" : {
-      "node":"8.8.0"
-  }
 }
