@@ -50,7 +50,7 @@ router.put('/assignments/:id', function (req, res, next) {
             next(err);
             return;
         } 
-        const dbfunc = async () => {
+        (async function() {
             try {
                 //security check to make sure some1 doesn't just modify the URL and change data that's not theirs
                 const res1 = await client.query('select email from users natural join takes natural join assignments where assignment_id=$1', [id]);
@@ -67,12 +67,11 @@ router.put('/assignments/:id', function (req, res, next) {
             } finally {
                 finish();
             }
-        };
-        dbfunc();
+        })();
     });
 });
 //creating a new class. so far untested
-router.post('/class', function(req, res, next) {
+router.post('/classes', function(req, res, next) {
     const body = req.body;
     const className = body.className;
     res.responseType = 'application/json';
@@ -81,14 +80,14 @@ router.post('/class', function(req, res, next) {
             console.log(err);
             next(err);
         }
-        const doDb = async () => {
+        (async function() { //IIFE
             try {
                 await client.query('BEGIN');
                 const dbres = await client.query('insert into classes(class_name) values($1) returning class_id', [className]);
-                await client.query('insert into takes(class_id, user_id) values($1, (select user_id from users where email=$2))', [dbres.rows[0], req.cookies.email]); 
+                await client.query('insert into takes(class_id, user_id) values($1, (select user_id from users where email=$2))', [dbres.rows[0].class_id, req.cookies.email]); 
                 await client.query('COMMIT');
                 res.status=200;
-                res.send('success');
+                res.send({className:className});
             } catch (err) {
                 client.query('ROLLBACK');
                 res.status=400;
@@ -96,10 +95,22 @@ router.post('/class', function(req, res, next) {
             } finally {
                 finish();
             }
-        };
-        doDb();
+        })();
     });
 
+});
+router.get('/classes', function(req, res, next) {
+    const email = req.cookies.email;
+    (async function() { //gotta love them IIFE's boi
+        try {
+            const dbres = await db.query('select class_name from classes natural join takes natural join users where email=$1', [email]); 
+            res.status=200;
+            res.responseType='json';
+            res.send(dbres.rows);
+        } catch (err) {
+            next(err);
+        }
+    })();
 });
 router.post('/assignments', function (req, res) {
     const body = req.body;
