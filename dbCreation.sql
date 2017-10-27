@@ -18,14 +18,14 @@ CREATE TABLE IF NOT EXISTS assignments (
   comment       VARCHAR(128),
   duedate       DATE,
   completed     BOOLEAN,
-  FOREIGN KEY (class_id) REFERENCES classes,
-  FOREIGN KEY (user_id) REFERENCES users
+  FOREIGN KEY (class_id) REFERENCES classes on DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users on DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS takes (
   class_id INTEGER,
   user_id  INTEGER,
-  FOREIGN KEY (class_id) REFERENCES classes,
-  FOREIGN KEY (user_id) REFERENCES users,
+  FOREIGN KEY (class_id) REFERENCES classes on DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users on delete CASCADE,
   PRIMARY KEY (user_id, class_id)
 );
 CREATE TABLE IF NOT EXISTS subtask (
@@ -34,5 +34,5 @@ CREATE TABLE IF NOT EXISTS subtask (
   completed     BOOLEAN,
   duedate       DATE,
   PRIMARY KEY (assignment_id, task),
-  FOREIGN KEY (assignment_id) REFERENCES assignments
+  FOREIGN KEY (assignment_id) REFERENCES assignments on DELETE CASCADE
 );

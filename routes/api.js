@@ -84,7 +84,10 @@ router.post('/classes', function(req, res, next) {
             try {
                 await client.query('BEGIN');
                 const dbres = await client.query('insert into classes(class_name) values($1) returning class_id', [className]);
-                const idres = await client.query('insert into takes(class_id, user_id) values($1, (select user_id from users where email=$2)) returning class_id', [dbres.rows[0].class_id, req.cookies.email]); 
+                const idres = await client.query('insert into takes(class_id, user_id) values($1, (select user_id from users where email=$2)) returning class_id', [
+                    dbres.rows[0].class_id,
+                    req.cookies.email
+                ]); 
                 await client.query('COMMIT');
                 res.status=200;
                 res.send({
@@ -95,6 +98,7 @@ router.post('/classes', function(req, res, next) {
                 client.query('ROLLBACK');
                 res.status=400;
                 res.send('fail');
+                console.log(err);
             } finally {
                 finish();
             }
@@ -121,17 +125,16 @@ router.delete('/classes/:id', function(req,res,next) {
     db.getClient(function(err, client, finish) {
         (async function() {
             try {
-                await client.query('BEGIN');
                 const res1 = await client.query('select user_id from users natural join takes where email = $1 and class_id = $2', [email, class_id]);
                 if(!res1.rows[0]) {
                     throw new Error('you don\'t take this course');
                 }
-                await client.query('delete from takes where user_id = $1 and class_id = $2', [res1.rows[0].user_id, class_id]);
-                await client.query('COMMIT');
+                await client.query('delete from classes where class_id=$1', [class_id]);
+                //use next line if you're going to end up doing things where multiple people can share an assignment and a class
+                //await client.query('delete from takes where user_id = $1 and class_id = $2', [res1.rows[0].user_id, class_id]);
                 res.status = 200;
                 res.send({id:class_id});
             } catch (err) {
-                client.query('ROLLBACK');
                 res.status = 401;
                 res.send({id:-1});
                 next(err);
@@ -141,24 +144,48 @@ router.delete('/classes/:id', function(req,res,next) {
         })();
     });
 });
-router.post('/assignments', function (req, res) {
-    const body = req.body;
-    const title = body.title;
-    const message = body.message;
+router.post('/assignments', function (req, res, next) {
     res.responseType = 'application/json';
-    if (title == null || title == '' || title.length > 50 || message == null || message == '') {
-        res.status = 401;
-        res.redirect('/');
-    } else {
-        db.query('insert into posts(title, body, score) values($1, $2, 0) returning id as id', [title, message],
-            (err, dbres) => {
-                if (err) {
-                    console.log(err);
+    console.log('body is ', req.body);
+    const title = req.body.assignmentTitle;
+    const email = req.cookies.email;
+    db.getClient(function(err, client, finish) {
+        (async function() { //TODO clean up and write more code so you only open a connection if you really have to
+            try {
+                if (!title || title == '' || title.length > 50) {
+                    throw new Error('bad title');
                 }
-                res.status(200);
-                res.send(dbres.rows[0].id);
+                let duedate = new Date(req.body.dueDate);
+                if (isNaN(duedate.getTime())) {
+                    duedate = null;
+                }
+                const class_id = req.body.selectedClass ? req.body.selectedClass.class_id : null;
+                if(!class_id) {
+                    throw new Error('bad class id');
+                }
+                const res1 = await client.query('select user_id from users natural join takes where email = $1 and class_id = $2', [email, class_id]);
+                if(!res1.rows[0]) {
+                    throw new Error('bad class id');
+                }
+                const ret2 = await client.query('insert into assignments(user_id, class_id, title, comment, duedate, completed) values($1, $2, $3, $4, $5, $6)' +
+                    'returning assignment_id', [
+                    res1.rows[0].user_id,
+                    class_id,
+                    title,
+                    req.body.assignmentDescription,
+                    duedate,
+                    false
+                ]);
+                res.status=200;
+                res.send(ret2.rows[0]);
+            } catch (err) {
+                res.status=403;
+                res.send({error:err.message});
+                next(err);
+            } finally {
+                finish();
             }
-        );
-    }
+        })();
+    });
 });
 module.exports = router;

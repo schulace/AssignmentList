@@ -40,8 +40,6 @@ pageModule.service('pgdata', ['$http', function($http) {
             responseType:'json'
         }).then(function(res) {
             $scope.classes = res.data;
-        }, function(err) {
-            console.warn('failed to get classes: ', err.status);
         });
     };
 }]);
@@ -76,9 +74,6 @@ pageModule.controller('loginController', function($scope, $http, pgdata) {
         email:'',
         password:'' //temp lol
     };
-    $scope.$watch(() =>pgdata.loggedIn, function(newval) {
-        $scope.loggedIn = newval;
-    });
     $scope.signup = function() {
         $http({
             url:'/newUser',
@@ -104,34 +99,43 @@ pageModule.controller('loginController', function($scope, $http, pgdata) {
     };
 });
 pageModule.controller('assignmentsController', function($scope, $http, pgdata) {
+    $scope.showCompleted=true;
     $scope.assignments = pgdata.assignments;
-    $scope.loggedIn = pgdata.loggedIn;
     $scope.$watch(() => pgdata.assignments, function(newval) {
         $scope.assignments = newval;
     }, true);
-    $scope.$watch(() => pgdata.loggedIn, function(nv) {
-        $scope.loggedIn = nv;
-    });
 });
 pageModule.controller('addAssignmentController', function($scope, $http, pgdata) {
     $scope.classes = pgdata.classes;
-    $scope.selectedClass;
     $scope.$watch(()=>pgdata.classes, function(newval) {
         $scope.classes = newval;
-        $scope.selectedClass = $scope.classes[0] ? $scope.classes[0].class_name:null;
+        $scope.formdata.selectedClass = $scope.classes[0] ? $scope.classes[0].class_name:null;
     }, true);
     $scope.addClass = function() {
         $http({
             url:'/api/assignments',
             method:'POST',
             responseType:'json',
-            data: {
-                class_for: $scope.selectedClass
-            }
+            data: $scope.formdata
         }).then(function(success){
-            pgdata.assignments.push('a'); //TODO implement
+            pgdata.assignments.push({
+                title:  $scope.formdata.assignmentTitle,
+                duedate: $scope.formdata.dueDate,
+                class_name: $scope.formdata.selectedClass.class_name,
+                completed: false,
+                assignment_id: success.data.assignment_id
+            });
+        }, function(err) {
+            console.log('error while adding assignment ', err);
         });
     };
+    $scope.formdata = {
+        assignmentTitle:'',
+        dueDate:'',
+        selectedClass:null,
+        assignmentDescription:''
+    }
+    $('#dueDate').datepicker();
 });
 pageModule.controller('assignmentController', function($scope, $http, pgdata){
     $scope.item = pgdata.assignments[$scope.$index];
@@ -187,12 +191,9 @@ pageModule.controller('profileController', function($scope, $http, pgdata) {
         }).then(function(res) {
             console.log(res.data);
             pgdata.classes= pgdata.classes.filter(item => item.class_id != res.data.id);
+            pgdata.populate(); //cascading on database makes it easier to do this
         }, function(err) {
             console.log('failed on class delete: ', err.status);
         });
     };
-});
-
-$(window).load(function() {
-    $('.datePicker').datepicker({format:'DD/MM/YY'});
 });

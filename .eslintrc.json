@@ -31,6 +31,9 @@
         ],
         "no-unused-vars":[
             1
+        ],
+        "indent":[
+            0
         ]
     },
     "globals": {

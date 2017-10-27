@@ -6,10 +6,9 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css">
     <!--jquery-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="./javascripts/jquery-ui-min.js"></script>
-    <link rel="stylesheet" href="./stylesheets/jquery-ui-min.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <!--bootstrap 4 js-->
-    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
     <!--angular-->
@@ -28,8 +27,13 @@
               <div class="col-sm-6">
                 <em>your assignments:</em>
               </div>
-              <div class="col-sm-6">
-                <button class="btn float-right" type="button" data-toggle='modal' data-target="#assignmentModal">new assignment</a></button>
+              <label for=""></label>
+              <div class="col-sm-3">
+                <label for="show_completed_box">show completed</label>
+                <input id="show_completed_box" type="checkbox" ng-model="showCompleted">
+              </div>
+              <div class="col-sm-3">
+                <button class="btn" type="button" data-toggle='modal' data-target="#assignmentModal">new assignment</a></button>
               </div>
 
               <!--modal for adding assignments-->
@@ -42,15 +46,24 @@
                     <div class="modal-body">
                       <form name="addAssignmentForm" novalidate>
                         <div class="form-group">
+                          <label for="assignmentTitle">assignment title:</label>
+                          <input class="form-control" id="assignmentTitle" type="text" ng-model="formdata.assignmentTitle" name="assignTitle">
+                          <div class="alert-danger" ng-show="!addAssignmentForm.assignTitle.$pristine && formdata.assignmentTitle == ''">can't be blank</div>
+                        </div>
+                        <div class="form-group">
+                          <label for="assignmentDescription">description:</label>
+                          <input id="assignmentDescription" class="form-control" type="textarea" ng-model="formdata.assignmentDescription">
+                        </div>
+                        <div class="form-group">
                           <label for="classSelector">class:</label>
-                          <select id="classSelector" class="form-control" ng-model="selectedClass" name="classSelector">
-                            <option ng-repeat="class in classes">{{class.class_name}}</option>
+                          <select id="classSelector" class="form-control" ng-model="formdata.selectedClass" name="classSelector"
+                            ng-options="class as class.class_name for class in classes">
                           </select>
-                          <div class="alert-danger" ng-show="!selectedClass">please select an option from above or add a new class</div>
+                          <div class="alert-danger" ng-show="!formdata.selectedClass">please select an option from above or add a new class</div>
                         </div>
                         <div class="form-group">
                           <label for="dateSelector">due date</label>
-                          <input id="dueDate" class="datePicker">
+                          <input id="dueDate" class="datePicker" class="form-control" type="text" ng-model="formdata.dueDate">
                         </div>
                       </form>
                     </div>
@@ -65,7 +78,7 @@
 
             <!--list of assignments-->
             <table class='table'>
-              <tr ng-repeat='item in assignments track by $index' ng-controller='assignmentController'>
+              <tr ng-repeat='item in assignments track by $index' ng-controller='assignmentController' ng-show='!item.completed || $parent.showCompleted'>
                 <td>
                   <input type='checkbox' ng-model='item.completed' ng-change='update()'>
                 </td>
