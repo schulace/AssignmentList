@@ -7,11 +7,11 @@ const pageModule = angular.module('postsPage', []);
  *  in sync with the backend postgres db so that on updates,
  *  we don't need to fetch entire lists, we can just update
  *  things in this table
-*/
+ */
 pageModule.service('pgdata', ['$http', function($http) {
     let $scope = this;
-    $scope.assignments = [];
-    $scope.classes = [];
+    $scope.assignments = []; //{title, duedate, class_name, completed, assignment_id}
+    $scope.classes = []; //{class_name, class_id}
     $scope.loggedIn = false;
     $scope.populate = function() {
         let cook = {};
@@ -33,7 +33,6 @@ pageModule.service('pgdata', ['$http', function($http) {
         });
     }; 
     $scope.email = '';
-    $scope.classes;
     $scope.populateClasses = function() {
         $http({
             url:'/api/classes',
@@ -61,23 +60,21 @@ pageModule.controller('loginController', function($scope, $http, pgdata) {
             method:'POST',
             responseType:'json',
             data: $scope.formdata
-        }).then(
-            function(){
-                pgdata.populate();
-                pgdata.email = $scope.formdata.email;
-                pgdata.populateClasses();
-            },
-            function(err){
-                if(err.status === 500) {
-                    alert('login server down');
-                } else {
-                    alert('login failed');
-                }
-            });
+        }).then(function() {
+            pgdata.populate();
+            pgdata.email = $scope.formdata.email;
+            pgdata.populateClasses();
+        }, function(err) {
+            if(err.status === 500) {
+                alert('login server down');
+            } else {
+                alert('login failed');
+            }
+        });
     }; 
     $scope.formdata = {
-        email:'ajs520@lehigh.edu',
-        password:'password' //temp lol
+        email:'',
+        password:'' //temp lol
     };
     $scope.$watch(() =>pgdata.loggedIn, function(newval) {
         $scope.loggedIn = newval;
@@ -102,7 +99,6 @@ pageModule.controller('loginController', function($scope, $http, pgdata) {
         }).then(function() {
             pgdata.loggedIn = false;
         }, function(err) {
-
             console.log(err);
         });
     };
@@ -116,6 +112,26 @@ pageModule.controller('assignmentsController', function($scope, $http, pgdata) {
     $scope.$watch(() => pgdata.loggedIn, function(nv) {
         $scope.loggedIn = nv;
     });
+});
+pageModule.controller('addAssignmentController', function($scope, $http, pgdata) {
+    $scope.classes = pgdata.classes;
+    $scope.selectedClass;
+    $scope.$watch(()=>pgdata.classes, function(newval) {
+        $scope.classes = newval;
+        $scope.selectedClass = $scope.classes[0] ? $scope.classes[0].class_name:null;
+    }, true);
+    $scope.addClass = function() {
+        $http({
+            url:'/api/assignments',
+            method:'POST',
+            responseType:'json',
+            data: {
+                class_for: $scope.selectedClass
+            }
+        }).then(function(success){
+            pgdata.assignments.push('a'); //TODO implement
+        });
+    };
 });
 pageModule.controller('assignmentController', function($scope, $http, pgdata){
     $scope.item = pgdata.assignments[$scope.$index];
@@ -155,11 +171,28 @@ pageModule.controller('profileController', function($scope, $http, pgdata) {
                 className:$scope.modalClass
             }
         }).then(function(success) {
-            pgdata.classes.push(success.data.className);
-            console.log('classes is ', pgdata.classes)
+            pgdata.classes.push(success.data);
+            console.log('classes is ', pgdata.classes);
         }, function(err) {
             alert('unable to create class ', err.status);
         });
         $('#classModal').modal('hide');
     };
+    $scope.deleteClass = function(class_id) {
+        console.log('class_id: ', class_id);
+        $http({
+            url:'/api/classes/' + class_id,
+            method:'DELETE',
+            responseType:'json',
+        }).then(function(res) {
+            console.log(res.data);
+            pgdata.classes= pgdata.classes.filter(item => item.class_id != res.data.id);
+        }, function(err) {
+            console.log('failed on class delete: ', err.status);
+        });
+    };
+});
+
+$(window).load(function() {
+    $('.datePicker').datepicker({format:'DD/MM/YY'});
 });

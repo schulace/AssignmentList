@@ -6,6 +6,8 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css">
     <!--jquery-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="./javascripts/jquery-ui-min.js"></script>
+    <link rel="stylesheet" href="./stylesheets/jquery-ui-min.css">
     <!--bootstrap 4 js-->
     <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
@@ -19,15 +21,49 @@
     <div class='container-fluid'>
       <div class="row" ng-controller='allController' ng-switch='loggedIn'>
         <div class="col-sm-9">
+
+          <!--shown when logged in. contains list of assignments and modal for adding class-->
           <div ng-controller='assignmentsController' ng-switch-when='true'>
             <div class="row">
               <div class="col-sm-6">
                 <em>your assignments:</em>
               </div>
               <div class="col-sm-6">
-                <button class="btn float-right" type="button" ng-click="newAssignment()">new assignment</button>
+                <button class="btn float-right" type="button" data-toggle='modal' data-target="#assignmentModal">new assignment</a></button>
+              </div>
+
+              <!--modal for adding assignments-->
+              <div id="assignmentModal" class="modal fade" role="dialog" ng-controller="addAssignmentController">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h2>add new assignment</h2>
+                    </div>
+                    <div class="modal-body">
+                      <form name="addAssignmentForm" novalidate>
+                        <div class="form-group">
+                          <label for="classSelector">class:</label>
+                          <select id="classSelector" class="form-control" ng-model="selectedClass" name="classSelector">
+                            <option ng-repeat="class in classes">{{class.class_name}}</option>
+                          </select>
+                          <div class="alert-danger" ng-show="!selectedClass">please select an option from above or add a new class</div>
+                        </div>
+                        <div class="form-group">
+                          <label for="dateSelector">due date</label>
+                          <input id="dueDate" class="datePicker">
+                        </div>
+                      </form>
+                    </div>
+                    <div class="modal-footer">
+                      <button class="btn btn-primary" data-dismiss="modal" ng-click="addClass()">add assignment</button>
+                      <button class="btn btn-secondary" data-dismiss="modal">cancel</button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+
+            <!--list of assignments-->
             <table class='table'>
               <tr ng-repeat='item in assignments track by $index' ng-controller='assignmentController'>
                 <td>
@@ -42,13 +78,19 @@
               </tr>
             </table>
           </div>
+
+          <!--shown when not logged in. will contain a description + maybe a demo-->
           <div ng-switch-when='false'>
             <h1>//TODO</h1>
             <div class="alert alert-info">this will eventually contain a description</div>
           </div>
         </div>
+
+        <!--holds the login/signup and classes parts of the page-->
         <div class='col-sm-3' ng-controller='loginController'>
+          <!--the login and signup stuff. shown when not logged in-->
           <div class="container" id="loginselector" ng-switch-when='false'>
+            <!--tabs for login and sign up-->
             <ul class="nav nav-tabs">
               <li class="nav-item">
                 <a class="nav-link active" data-toggle="tab" href="#loginTab">log in</a>
@@ -57,7 +99,10 @@
                 <a class="nav-link" data-toggle="tab" href="#signupTab">sign up</a>
               </li>
             </ul>
+
+            <!--content for sign in/up tabs-->
             <div class="tab-content">
+              <!--login form. shown when login tab selected-->
               <div id="loginTab" class="tab-pane container fade show active">
                 <form name='loginForm' novalidate>
                   <div class='form-group'>
@@ -75,6 +120,8 @@
                   </div>
                 </form>
               </div>
+
+              <!--signup form. shown when signup is selected-->
               <div id="signupTab" class="tab-pane container fade">
                 <form name="signupForm">
                   <div class='form-group'>
@@ -92,8 +139,11 @@
                   </div>
                 </form>
               </div>
+
             </div>
           </div>
+
+          <!--shown when logged in. contains logic for showing and adding classes-->
           <div class="container" ng-switch-when='true' ng-controller='profileController'>
             <h2>profile for</h2>
             <h2>{{email}}</h2>
@@ -101,6 +151,7 @@
               <div class="col-lg-6">classes</div>
               <div class="col-lg-6">
                 <button class="btn btn-secondary btn-sm float-right" data-toggle="modal" data-target="#classModal">+</button>
+
                 <!--class creation modal-->
                 <div id="classModal" class="modal fade">
                   <div class="modal-dialog" role="document">
@@ -109,23 +160,31 @@
                         create a new class
                       </div>
                       <div class="modal-body">
-                        <label for="className">class:</label>
-                        <input type="text" class="className" ng-model="modalClass" placeholder="new class name here" autofocus>
+                        <div class="form-group">
+                          <label for="className">class:</label>
+                          <input type="text" id="className" class='form-control' ng-model="modalClass" placeholder="new class name here" autofocus>
+                        </div>
                       </div>
                       <div class="modal-footer">
-                        <button class="btn" ng-click="createClass()">create class</button>
-                        <button class="btn" data-dismiss="modal">close</button>
+                        <button class="btn btn-primary" ng-click="createClass()">create class</button>
+                        <button class="btn btn-secondary" data-dismiss="modal">close</button>
                       </div>
                     </div>
                   </div>
                 </div>
+
               </div>
             </div>
+
+            <!--table with listing of all classes-->
             <table class="table">
               <tr ng-repeat='class in classes'>
                 <td>{{class.class_name}}</td>
+                <td><button class="btn btn-sm float-right" ng-click='deleteClass(class.class_id)'>-</button></td>
               </tr>
             </table>
+
+            <!--log out button-->
             <button class="btn btn-danger btn-block float-center" ng-click='logout()'>logout</button>
           </div>
         </div>

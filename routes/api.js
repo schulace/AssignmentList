@@ -84,10 +84,13 @@ router.post('/classes', function(req, res, next) {
             try {
                 await client.query('BEGIN');
                 const dbres = await client.query('insert into classes(class_name) values($1) returning class_id', [className]);
-                await client.query('insert into takes(class_id, user_id) values($1, (select user_id from users where email=$2))', [dbres.rows[0].class_id, req.cookies.email]); 
+                const idres = await client.query('insert into takes(class_id, user_id) values($1, (select user_id from users where email=$2)) returning class_id', [dbres.rows[0].class_id, req.cookies.email]); 
                 await client.query('COMMIT');
                 res.status=200;
-                res.send({className:className});
+                res.send({
+                    class_name:className,
+                    class_id:idres.rows[0].class_id
+                });
             } catch (err) {
                 client.query('ROLLBACK');
                 res.status=400;
@@ -97,13 +100,12 @@ router.post('/classes', function(req, res, next) {
             }
         })();
     });
-
 });
 router.get('/classes', function(req, res, next) {
     const email = req.cookies.email;
     (async function() { //gotta love them IIFE's boi
         try {
-            const dbres = await db.query('select class_name from classes natural join takes natural join users where email=$1', [email]); 
+            const dbres = await db.query('select class_name, class_id from classes natural join takes natural join users where email=$1', [email]); 
             res.status=200;
             res.responseType='json';
             res.send(dbres.rows);
@@ -111,6 +113,33 @@ router.get('/classes', function(req, res, next) {
             next(err);
         }
     })();
+});
+router.delete('/classes/:id', function(req,res,next) {
+    const email = req.cookies.email;
+    const class_id = req.params.id;
+    console.log('email: ', email, '\nclass_id: ', class_id);
+    db.getClient(function(err, client, finish) {
+        (async function() {
+            try {
+                await client.query('BEGIN');
+                const res1 = await client.query('select user_id from users natural join takes where email = $1 and class_id = $2', [email, class_id]);
+                if(!res1.rows[0]) {
+                    throw new Error('you don\'t take this course');
+                }
+                await client.query('delete from takes where user_id = $1 and class_id = $2', [res1.rows[0].user_id, class_id]);
+                await client.query('COMMIT');
+                res.status = 200;
+                res.send({id:class_id});
+            } catch (err) {
+                client.query('ROLLBACK');
+                res.status = 401;
+                res.send({id:-1});
+                next(err);
+            } finally {
+                finish();
+            }
+        })();
+    });
 });
 router.post('/assignments', function (req, res) {
     const body = req.body;
