@@ -149,12 +149,14 @@ pageModule.controller('assignmentController', function($scope, $http, pgdata){
                 tick:$scope.item.completed
             }
         }).then(function () {
-            console.log('updated');
         }, function() {
             $scope.item.completed = !$scope.item.completed;
             alert('unable to connect to server');
         });
     };
+    $scope.prettyDate = function(dateIn) {
+        return prettyDate(dateIn);
+    }
 });
 pageModule.controller('profileController', function($scope, $http, pgdata) {
     $scope.email = pgdata.email;
@@ -197,3 +199,13 @@ pageModule.controller('profileController', function($scope, $http, pgdata) {
         });
     };
 });
+
+
+//END ANGULAR
+function prettyDate(dateIn) {
+    const dateDiff = new Date(dateIn) - new Date();
+    const daysLeft = Math.ceil(dateDiff / (60*60*24*1000));
+    const start = daysLeft <0 ? 'due ' : 'due in ';
+    const ending = daysLeft <0 ? ' days ago': ' days';
+    return start + Math.abs(daysLeft) + ending;
+}
