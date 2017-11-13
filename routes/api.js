@@ -12,7 +12,7 @@ router.get('/assignments', function (req, res) {
     res.responseType = 'application/json';
     let email = req.cookies.email;
     //console.log('got request for posts: ' + JSON.stringify(req));
-    db.query('select title, duedate, completed, class_name, assignment_id from assignments natural join users natural join takes natural join classes where email=$1', [email], (err, dbres) => {
+    db.query('select title, duedate, completed, class_name, assignment_id, class_id from assignments natural join users natural join takes natural join classes where email=$1', [email], (err, dbres) => {
         if (err) {
             console.err(err.message);
             res.responseType = 'application/json';

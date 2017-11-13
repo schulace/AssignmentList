@@ -78,7 +78,8 @@
 
             <!--list of assignments-->
             <table class='table'>
-              <tr ng-repeat='item in assignments track by $index' ng-controller='assignmentController' ng-show='!item.completed || $parent.showCompleted'>
+              <tr ng-repeat='item in assignments track by $index' ng-controller='assignmentController'
+                ng-show='(!item.completed || $parent.showCompleted) && ($parent.$parent.selected_class == item.class_id || selected_class == 0)'>
                 <td>
                   <input type='checkbox' ng-model='item.completed' ng-change='update()'>
                 </td>
@@ -194,7 +195,7 @@
 
             <!--table with listing of all classes-->
             <table class="table">
-              <tr ng-repeat='class in classes'>
+              <tr ng-repeat='class in classes' ng-class="{'text-primary': class.class_id == $parent.selected_class}" ng-click="set_selected_class(class.class_id)">
                 <td>{{class.class_name}}</td>
                 <td><button class="btn btn-sm float-right" ng-click='deleteClass(class.class_id)'>-</button></td>
               </tr>

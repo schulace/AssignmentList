@@ -10,9 +10,10 @@ const pageModule = angular.module('postsPage', []);
  */
 pageModule.service('pgdata', ['$http', function($http) {
     let $scope = this;
-    $scope.assignments = []; //{title, duedate, class_name, completed, assignment_id}
+    $scope.assignments = []; //{title, duedate, class_name, completed, assignment_id, class_id}
     $scope.classes = []; //{class_name, class_id}
     $scope.loggedIn = false;
+    $scope.selected_class = 0;
     $scope.populate = function() {
         let cook = {};
         document.cookie.replace('%40','@').split(';').forEach((ck) => {
@@ -31,7 +32,7 @@ pageModule.service('pgdata', ['$http', function($http) {
             $scope.loggedIn = false;
             alert('not logged in');
         });
-    }; 
+    };
     $scope.email = '';
     $scope.populateClasses = function() {
         $http({
@@ -45,6 +46,7 @@ pageModule.service('pgdata', ['$http', function($http) {
 }]);
 pageModule.controller('allController', function($scope, pgdata) {
     $scope.loggedIn = pgdata.loggedIn;
+    $scope.selected_class = 0;
     $scope.$watch(() => pgdata.loggedIn, function(nval) {
         $scope.loggedIn = nval;
     });
@@ -69,7 +71,7 @@ pageModule.controller('loginController', function($scope, $http, pgdata) {
                 alert('login failed');
             }
         });
-    }; 
+    };
     $scope.formdata = {
         email:'',
         password:'' //temp lol
@@ -134,7 +136,7 @@ pageModule.controller('addAssignmentController', function($scope, $http, pgdata)
         dueDate:'',
         selectedClass:null,
         assignmentDescription:''
-    }
+    };
     $('#dueDate').datepicker();
 });
 pageModule.controller('assignmentController', function($scope, $http, pgdata){
@@ -156,10 +158,13 @@ pageModule.controller('assignmentController', function($scope, $http, pgdata){
     };
     $scope.prettyDate = function(dateIn) {
         return prettyDate(dateIn);
-    }
+    };
 });
 pageModule.controller('profileController', function($scope, $http, pgdata) {
     $scope.email = pgdata.email;
+    $scope.set_selected_class = function(id) {
+        $scope.$parent.$parent.$parent.selected_class = id == $scope.selected_class ? 0: id;
+    };
     $scope.$watch(() => pgdata.email, function(nval) {
         $scope.email = nval;
     });
