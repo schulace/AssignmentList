@@ -8,28 +8,29 @@ const pageModule = angular.module('postsPage', []);
  *  we don't need to fetch entire lists, we can just update
  *  things in this table
  */
-pageModule.service('pgdata', ['$http', function($http) {
-    let $scope = this;
-    $scope.assignments = []; //{title, duedate, class_name, completed, assignment_id, class_id}
-    $scope.classes = []; //{class_name, class_id}
-    $scope.loggedIn = false;
-    $scope.selected_class = 0;
+pageModule.controller('allController', function($scope, $http) {
+    $scope.model = {
+        assignments : [], //{title, duedate, class_name, completed, assignment_id, class_id}
+        classes : [], //{class_name, class_id}
+        loggedIn : false,
+        selected_class : 0
+    }
     $scope.populate = function() {
         let cook = {};
         document.cookie.replace('%40','@').split(';').forEach((ck) => {
             let pair = ck.split('=');
             cook[pair[0]] = pair[1];
         });
-        $scope.email= cook.email;
+        $scope.model.email= cook.email;
         $http({
             url:'/api/assignments',
             method:'GET',
             responseType:'json'
         }).then(function(res) {
-            $scope.assignments = res.data;
-            $scope.loggedIn = true;
+            $scope.model.assignments = res.data;
+            $scope.model.loggedIn = true;
         }, function() {
-            $scope.loggedIn = false;
+            $scope.model.loggedIn = false;
             alert('not logged in');
         });
     };
@@ -40,20 +41,13 @@ pageModule.service('pgdata', ['$http', function($http) {
             method:'GET',
             responseType:'json'
         }).then(function(res) {
-            $scope.classes = res.data;
+            $scope.model.classes = res.data;
         });
     };
-}]);
-pageModule.controller('allController', function($scope, pgdata) {
-    $scope.loggedIn = pgdata.loggedIn;
-    $scope.selected_class = 0;
-    $scope.$watch(() => pgdata.loggedIn, function(nval) {
-        $scope.loggedIn = nval;
-    });
-    pgdata.populate();
-    pgdata.populateClasses();
+    $scope.populate();
+    $scope.populateClasses();
 });
-pageModule.controller('loginController', function($scope, $http, pgdata) {
+pageModule.controller('loginController', function($scope, $http) {
     $scope.login = function () {
         $http({
             url:'/login',
@@ -61,9 +55,9 @@ pageModule.controller('loginController', function($scope, $http, pgdata) {
             responseType:'json',
             data: $scope.formdata
         }).then(function() {
-            pgdata.populate();
-            pgdata.email = $scope.formdata.email;
-            pgdata.populateClasses();
+            $scope.populate();
+            $scope.model.email = $scope.formdata.email;
+            $scope.populateClasses();
         }, function(err) {
             if(err.status === 500) {
                 alert('login server down');
@@ -94,25 +88,16 @@ pageModule.controller('loginController', function($scope, $http, pgdata) {
             url:'/login',
             method:'DELETE',
         }).then(function() {
-            pgdata.loggedIn = false;
+            $scoe.model.loggedIn = false;
         }, function(err) {
             console.log(err);
         });
     };
 });
-pageModule.controller('assignmentsController', function($scope, $http, pgdata) {
+pageModule.controller('assignmentsController', function($scope, $http) {
     $scope.showCompleted=true;
-    $scope.assignments = pgdata.assignments;
-    $scope.$watch(() => pgdata.assignments, function(newval) {
-        $scope.assignments = newval;
-    }, true);
 });
-pageModule.controller('addAssignmentController', function($scope, $http, pgdata) {
-    $scope.classes = pgdata.classes;
-    $scope.$watch(()=>pgdata.classes, function(newval) {
-        $scope.classes = newval;
-        $scope.formdata.selectedClass = $scope.classes[0] ? $scope.classes[0].class_name:null;
-    }, true);
+pageModule.controller('addAssignmentController', function($scope, $http) {
     $scope.addClass = function() {
         $http({
             url:'/api/assignments',
@@ -120,7 +105,7 @@ pageModule.controller('addAssignmentController', function($scope, $http, pgdata)
             responseType:'json',
             data: $scope.formdata
         }).then(function(success){
-            pgdata.assignments.push({
+            $socope.model.assignments.push({
                 title:  $scope.formdata.assignmentTitle,
                 duedate: $scope.formdata.dueDate,
                 class_name: $scope.formdata.selectedClass.class_name,
@@ -139,8 +124,8 @@ pageModule.controller('addAssignmentController', function($scope, $http, pgdata)
     };
     $('#dueDate').datepicker();
 });
-pageModule.controller('assignmentController', function($scope, $http, pgdata){
-    $scope.item = pgdata.assignments[$scope.$index];
+//look out for this one. may not behave as expected / wont update the main model
+pageModule.controller('assignmentController', function($scope, $http){
     $scope.update = function() {
         console.log('completed is ', $scope.item.completed);
         $http({
@@ -152,6 +137,7 @@ pageModule.controller('assignmentController', function($scope, $http, pgdata){
             }
         }).then(function () {
         }, function() {
+            //on error
             $scope.item.completed = !$scope.item.completed;
             alert('unable to connect to server');
         });
@@ -160,18 +146,10 @@ pageModule.controller('assignmentController', function($scope, $http, pgdata){
         return prettyDate(dateIn);
     };
 });
-pageModule.controller('profileController', function($scope, $http, pgdata) {
-    $scope.email = pgdata.email;
+pageModule.controller('profileController', function($scope, $http, ) {
     $scope.set_selected_class = function(id) {
-        $scope.$parent.$parent.$parent.selected_class = id == $scope.selected_class ? 0: id;
+        $scope.model.selectedClass = id ? id : 0;
     };
-    $scope.$watch(() => pgdata.email, function(nval) {
-        $scope.email = nval;
-    });
-    $scope.classes = pgdata.classes;
-    $scope.$watch(() => pgdata.classes, function(val) {
-        $scope.classes = val;
-    }, true);
     $scope.modalClass = '';
     $scope.createClass = function() {
         $http({
@@ -182,8 +160,8 @@ pageModule.controller('profileController', function($scope, $http, pgdata) {
                 className:$scope.modalClass
             }
         }).then(function(success) {
-            pgdata.classes.push(success.data);
-            console.log('classes is ', pgdata.classes);
+            $scope.model.classes.push(success.data);
+            console.log('classes is ', $scope.model.classes);
         }, function(err) {
             alert('unable to create class ', err.status);
         });
@@ -197,8 +175,8 @@ pageModule.controller('profileController', function($scope, $http, pgdata) {
             responseType:'json',
         }).then(function(res) {
             console.log(res.data);
-            pgdata.classes= pgdata.classes.filter(item => item.class_id != res.data.id);
-            pgdata.populate(); //cascading on database makes it easier to do this
+            $scope.model.classes= $scope.model.classes.filter(item => item.class_id != res.data.id);
+            $scope.populate(); //cascading on database makes it easier to do this
         }, function(err) {
             console.log('failed on class delete: ', err.status);
         });
@@ -208,6 +186,7 @@ pageModule.controller('profileController', function($scope, $http, pgdata) {
 
 //END ANGULAR
 function prettyDate(dateIn) {
+    if(!dateIn) return 'no due date'; //don't show due in if we don't know the duedate
     const dateDiff = new Date(dateIn) - new Date();
     const daysLeft = Math.ceil(dateDiff / (60*60*24*1000));
     const start = daysLeft <0 ? 'due ' : 'due in ';

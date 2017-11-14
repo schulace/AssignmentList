@@ -18,7 +18,7 @@
   </head>
   <body>
     <div class='container-fluid'>
-      <div class="row" ng-controller='allController' ng-switch='loggedIn'>
+      <div class="row" ng-controller='allController' ng-switch='model.loggedIn'>
         <div class="col-sm-9">
 
           <!--shown when logged in. contains list of assignments and modal for adding class-->
@@ -30,7 +30,7 @@
               <label for=""></label>
               <div class="col-sm-3">
                 <label for="show_completed_box">show completed</label>
-                <input id="show_completed_box" type="checkbox" ng-model="showCompleted">
+                <input id="show_completed_box" type="checkbox" ng-model="model.showCompleted">
               </div>
               <div class="col-sm-3">
                 <button class="btn" type="button" data-toggle='modal' data-target="#assignmentModal">new assignment</a></button>
@@ -79,7 +79,7 @@
             <!--list of assignments-->
             <table class='table'>
               <tr ng-repeat='item in assignments track by $index' ng-controller='assignmentController'
-                ng-show='(!item.completed || $parent.showCompleted) && ($parent.$parent.selected_class == item.class_id || selected_class == 0)'>
+                ng-show='(!item.completed || showCompleted) && (selected_class == item.class_id || selected_class == 0)'>
                 <td>
                   <input type='checkbox' ng-model='item.completed' ng-change='update()'>
                 </td>
@@ -142,13 +142,13 @@
               <div id="signupTab" class="tab-pane container fade">
                 <form name="signupForm">
                   <div class='form-group'>
-                    <label for='usernameInput'>email:</label>
-                    <input class='form-control' id='usernameInput' type='email' name='email' ng-model='formdata.email' placeholder='your email' required>
+                    <label for='SignupUsernameInput'>email:</label>
+                    <input class='form-control' id='SignupUsernameInput' type='email' name='email' ng-model='formdata.email' placeholder='your email' required>
                     <div class='alert-danger' ng-show='!signupForm.email.$pristine && !signupForm.email.$valid'>not a valid email address</div>
                   </div>
                   <div class='form-group'>
-                    <label for='passwordInput'>password:</label>
-                    <input class='form-control' id='passwordInput' type='password' name='password' ng-model='formdata.password' placeholder='password' required>
+                    <label for='signupPasswordInput'>password:</label>
+                    <input class='form-control' id='signupPasswordInput' type='password' name='password' ng-model='formdata.password' placeholder='password' required>
                     <div  class='alert-danger' ng-show='!signupForm.password.$pristine && !signupForm.password.$valid'>invalid password</div>
                   </div>
                   <div class='form-group'>
@@ -195,7 +195,7 @@
 
             <!--table with listing of all classes-->
             <table class="table">
-              <tr ng-repeat='class in classes' ng-class="{'text-primary': class.class_id == $parent.selected_class}" ng-click="set_selected_class(class.class_id)">
+              <tr ng-repeat='class in model.classes' ng-class="{'text-primary': class.class_id == selected_class}" ng-click="set_selected_class(class.class_id)">
                 <td>{{class.class_name}}</td>
                 <td><button class="btn btn-sm float-right" ng-click='deleteClass(class.class_id)'>-</button></td>
               </tr>
