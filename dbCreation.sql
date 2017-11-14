@@ -7,9 +7,6 @@ CREATE TABLE IF NOT EXISTS classes (
   class_id   SERIAL PRIMARY KEY,
   class_name VARCHAR(40) NOT NULL
 );
--- CREATE TYPE subtask as ( task varchar(50),
---     completed boolean
--- );
 CREATE TABLE IF NOT EXISTS assignments (
   assignment_id SERIAL PRIMARY KEY,
   user_id       INTEGER,
@@ -18,6 +15,7 @@ CREATE TABLE IF NOT EXISTS assignments (
   comment       VARCHAR(128),
   duedate       DATE,
   completed     BOOLEAN,
+  expected_hours INTEGER,
   FOREIGN KEY (class_id) REFERENCES classes on DELETE CASCADE,
   FOREIGN KEY (user_id) REFERENCES users on DELETE CASCADE
 );
@@ -33,6 +31,7 @@ CREATE TABLE IF NOT EXISTS subtask (
   task          VARCHAR(100),
   completed     BOOLEAN,
   duedate       DATE,
+  expected_hours INTEGER,
   PRIMARY KEY (assignment_id, task),
   FOREIGN KEY (assignment_id) REFERENCES assignments on DELETE CASCADE
 );
