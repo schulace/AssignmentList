@@ -2,51 +2,7 @@
  * Created by schulace on 9/18/17.
  */
 const pageModule = angular.module('postsPage', []);
-/**
- *  a holder for the relevant info. will remain mostly
- *  in sync with the backend postgres db so that on updates,
- *  we don't need to fetch entire lists, we can just update
- *  things in this table
- */
-pageModule.controller('allController', function($scope, $http) {
-    $scope.model = {
-        assignments : [], //{title, duedate, class_name, completed, assignment_id, class_id}
-        classes : [], //{class_name, class_id}
-        loggedIn : false,
-        selectedClass : 0,
-        email:''
-    };
-    $scope.populate = function() {
-        let cook = {};
-        document.cookie.replace('%40','@').split(';').forEach((ck) => {
-            let pair = ck.split('=');
-            cook[pair[0]] = pair[1];
-        });
-        $scope.model.email= cook.email;
-        $http({
-            url:'/api/assignments',
-            method:'GET',
-            responseType:'json'
-        }).then(function(res) {
-            $scope.model.assignments = res.data;
-            $scope.model.loggedIn = true;
-        }, function() {
-            $scope.model.loggedIn = false;
-            alert('not logged in');
-        });
-    };
-    $scope.populateClasses = function() {
-        $http({
-            url:'/api/classes',
-            method:'GET',
-            responseType:'json'
-        }).then(function(res) {
-            $scope.model.classes = res.data;
-        });
-    };
-    $scope.populate();
-    $scope.populateClasses();
-});
+
 pageModule.controller('loginController', function($scope, $http) {
     $scope.login = function () {
         $http({
