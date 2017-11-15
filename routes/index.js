@@ -43,11 +43,11 @@ router.post('/login', function(req, res, next) {
                     res.send('auth failed');
                 }
             });
-        } else if (!dbres.rows[0]) {
-            res.status(401);
-            res.send('no such user exists')
-        } else {
+        } else if (err) {
             next(err);
+        } else {
+            res.status(500);
+            res.send('unable to connect to database');
         }
     });
 });

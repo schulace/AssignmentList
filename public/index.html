@@ -30,7 +30,7 @@
               <label for=""></label>
               <div class="col-sm-3">
                 <label for="show_completed_box">show completed</label>
-                <input id="show_completed_box" type="checkbox" ng-model="model.showCompleted">
+                <input id="show_completed_box" type="checkbox" ng-model="showCompleted">
               </div>
               <div class="col-sm-3">
                 <button class="btn" type="button" data-toggle='modal' data-target="#assignmentModal">new assignment</a></button>
@@ -57,7 +57,7 @@
                         <div class="form-group">
                           <label for="classSelector">class:</label>
                           <select id="classSelector" class="form-control" ng-model="formdata.selectedClass" name="classSelector"
-                            ng-options="class as class.class_name for class in classes">
+                            ng-options="class as class.class_name for class in model.classes">
                           </select>
                           <div class="alert-danger" ng-show="!formdata.selectedClass">please select an option from above or add a new class</div>
                         </div>
@@ -78,10 +78,10 @@
 
             <!--list of assignments-->
             <table class='table'>
-              <tr ng-repeat='item in assignments track by $index' ng-controller='assignmentController'
-                ng-show='(!item.completed || showCompleted) && (selected_class == item.class_id || selected_class == 0)'>
+              <tr ng-repeat='item in model.assignments track by $index' ng-controller='assignmentController'
+                ng-show='(!item.completed || showCompleted) && (model.selected_class == item.class_id || model.selected_class == 0)'>
                 <td>
-                  <input type='checkbox' ng-model='item.completed' ng-change='update()'>
+                  <input type='checkbox' ng-model='item.completed' ng-change='update($index)'>
                 </td>
                 <td>
                   {{item.title}}

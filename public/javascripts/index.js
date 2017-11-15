@@ -14,7 +14,7 @@ pageModule.controller('allController', function($scope, $http) {
         classes : [], //{class_name, class_id}
         loggedIn : false,
         selected_class : 0
-    }
+    };
     $scope.populate = function() {
         let cook = {};
         document.cookie.replace('%40','@').split(';').forEach((ck) => {
@@ -88,7 +88,7 @@ pageModule.controller('loginController', function($scope, $http) {
             url:'/login',
             method:'DELETE',
         }).then(function() {
-            $scoe.model.loggedIn = false;
+            $scope.model.loggedIn = false;
         }, function(err) {
             console.log(err);
         });
@@ -105,7 +105,7 @@ pageModule.controller('addAssignmentController', function($scope, $http) {
             responseType:'json',
             data: $scope.formdata
         }).then(function(success){
-            $socope.model.assignments.push({
+            $scope.model.assignments.push({
                 title:  $scope.formdata.assignmentTitle,
                 duedate: $scope.formdata.dueDate,
                 class_name: $scope.formdata.selectedClass.class_name,
@@ -126,8 +126,9 @@ pageModule.controller('addAssignmentController', function($scope, $http) {
 });
 //look out for this one. may not behave as expected / wont update the main model
 pageModule.controller('assignmentController', function($scope, $http){
-    $scope.update = function() {
-        console.log('completed is ', $scope.item.completed);
+    $scope.update = function(index) {
+        console.log('completed in main scope is ', $scope.model.assignments[index].completed);
+        console.log('completed in this scope is ', $scope.item.completed);
         $http({
             url:'/api/assignments/' + $scope.item.assignment_id,
             method:'PUT',
