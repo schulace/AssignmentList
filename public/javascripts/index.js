@@ -13,7 +13,8 @@ pageModule.controller('allController', function($scope, $http) {
         assignments : [], //{title, duedate, class_name, completed, assignment_id, class_id}
         classes : [], //{class_name, class_id}
         loggedIn : false,
-        selected_class : 0
+        selectedClass : 0,
+        email:''
     };
     $scope.populate = function() {
         let cook = {};
@@ -34,7 +35,6 @@ pageModule.controller('allController', function($scope, $http) {
             alert('not logged in');
         });
     };
-    $scope.email = '';
     $scope.populateClasses = function() {
         $http({
             url:'/api/classes',
@@ -127,8 +127,6 @@ pageModule.controller('addAssignmentController', function($scope, $http) {
 //look out for this one. may not behave as expected / wont update the main model
 pageModule.controller('assignmentController', function($scope, $http){
     $scope.update = function(index) {
-        console.log('completed in main scope is ', $scope.model.assignments[index].completed);
-        console.log('completed in this scope is ', $scope.item.completed);
         $http({
             url:'/api/assignments/' + $scope.item.assignment_id,
             method:'PUT',
@@ -147,9 +145,9 @@ pageModule.controller('assignmentController', function($scope, $http){
         return prettyDate(dateIn);
     };
 });
-pageModule.controller('profileController', function($scope, $http, ) {
+pageModule.controller('profileController', function($scope, $http) {
     $scope.set_selected_class = function(id) {
-        $scope.model.selectedClass = id ? id : 0;
+        $scope.model.selectedClass = id == $scope.model.selectedClass ? 0 : id;
     };
     $scope.modalClass = '';
     $scope.createClass = function() {

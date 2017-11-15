@@ -79,7 +79,7 @@
             <!--list of assignments-->
             <table class='table'>
               <tr ng-repeat='item in model.assignments track by $index' ng-controller='assignmentController'
-                ng-show='(!item.completed || showCompleted) && (model.selected_class == item.class_id || model.selected_class == 0)'>
+                ng-show='(!item.completed || showCompleted) && (model.selectedClass == item.class_id || model.selectedClass == 0)'>
                 <td>
                   <input type='checkbox' ng-model='item.completed' ng-change='update($index)'>
                 </td>
@@ -163,7 +163,7 @@
           <!--shown when logged in. contains logic for showing and adding classes-->
           <div class="container" ng-switch-when='true' ng-controller='profileController'>
             <h2>profile for</h2>
-            <h2>{{email}}</h2>
+            <h2>{{model.email}}</h2>
             <div class="row">
               <div class="col-lg-6">classes</div>
               <div class="col-lg-6">
@@ -195,9 +195,9 @@
 
             <!--table with listing of all classes-->
             <table class="table">
-              <tr ng-repeat='class in model.classes' ng-class="{'text-primary': class.class_id == selected_class}" ng-click="set_selected_class(class.class_id)">
-                <td>{{class.class_name}}</td>
-                <td><button class="btn btn-sm float-right" ng-click='deleteClass(class.class_id)'>-</button></td>
+              <tr ng-repeat='clss in model.classes' ng-class="{'text-primary': clss.class_id == model.selectedClass}" ng-click="set_selected_class(clss.class_id)">
+                <td>{{clss.class_name}}</td>
+                <td><button class="btn btn-sm float-right" ng-click='deleteClass(clss.class_id)'>-</button></td>
               </tr>
             </table>
 
