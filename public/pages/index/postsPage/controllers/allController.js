@@ -1,8 +1,7 @@
 angular.module('postsPage').component('allController', {
     templateUrl: '../templates/allController.html',
     controller: allController
-})
-
+});
 allController.$inject('$scope', '$http');
 const allController = function($scope, $http) {
     $scope.model = {
@@ -42,4 +41,4 @@ const allController = function($scope, $http) {
     };
     $scope.populate();
     $scope.populateClasses();
-}
+};

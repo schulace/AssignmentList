@@ -1,40 +1,13 @@
 <div class="col-sm-9">
   <!--shown when logged in. contains list of assignments and modal for adding class-->
   <assignmentsController ng-switch-when='true'>
-    <div class="row">
-      <button class="btn btn-primary" data-dismiss="modal" ng-click="addClass()">add assignment</button>
-      <button class="btn btn-secondary" data-dismiss="modal">cancel</button>
-    </div>
-  </assignmentsController>
-</div>
-</div>
-</div>
+  </assignmenstController>
 
-<!--list of assignments-->
-<table class='table'>
-  <tr ng-repeat='item in model.assignments track by $index' ng-controller='assignmentController'
-                                        ng-show='(!item.completed || showCompleted) && (model.selectedClass == item.class_id || model.selectedClass == 0)'>
-    <td>
-      <input type='checkbox' ng-model='item.completed' ng-change='update($index)'>
-    </td>
-    <td>
-      {{item.title}}
-    </td>
-    <td>
-      {{item.class_name}}
-    </td>
-    <td>
-      {{prettyDate(item.duedate)}}
-    </td>
-  </tr>
-</table>
-</div>
-
-<!--shown when not logged in. will contain a description + maybe a demo-->
-<div ng-switch-when='false'>
-  <h1>//TODO</h1>
-  <div class="alert alert-info">this will eventually contain a description</div>
-</div>
+  <!--shown when not logged in. will contain a description + maybe a demo-->
+  <div ng-switch-when='false'>
+    <h1>//TODO</h1>
+    <div class="alert alert-info">this will eventually contain a description</div>
+  </div>
 </div>
 
 <!--holds the login/signup and classes parts of the page-->
