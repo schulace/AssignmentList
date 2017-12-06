@@ -1,0 +1,9 @@
+bugs: adding a new class doesn't get it turned into something that shows when viewing just 1 thing
+update on bug: when new assignment is created, it doesn't get a class id
+
+features to add:
+sort by date due
+sort by class
+hover to view description
+edit assignment
+delete assignment

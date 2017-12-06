@@ -110,7 +110,8 @@ pageModule.controller('addAssignmentController', function($scope, $http) {
                 duedate: $scope.formdata.dueDate,
                 class_name: $scope.formdata.selectedClass.class_name,
                 completed: false,
-                assignment_id: success.data.assignment_id
+                assignment_id: success.data.assignment_id,
+                class_id: success.data.class_id
             });
         }, function(err) {
             console.log('error while adding assignment ', err);
