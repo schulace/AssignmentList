@@ -178,7 +178,6 @@ router.post('/assignments', function (req, res, next) {
                 ]);
                 res.status=200;
                 const retval = ret2.rows[0];
-                retval.class_id = class_id;
                 res.send(retval);
             } catch (err) {
                 res.status=403;
