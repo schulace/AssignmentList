@@ -191,22 +191,23 @@ router.post('/assignments', function (req, res, next) {
                 if(!res1.rows[0]) {
                     throw new Error('bad class id');
                 }
-                const ret2 = await client.query('insert into assignments(user_id, class_id, title, comment, duedate, completed) values($1, $2, $3, $4, $5, $6)' +
+                const ret2 = await client.query('insert into assignments(user_id, class_id, title, comment, duedate, completed, expected_hours) values($1, $2, $3, $4, $5, $6)' +
                     'returning assignment_id', [
                     res1.rows[0].user_id,
                     class_id,
                     title,
                     req.body.assignmentDescription,
                     duedate,
-                    false
+                    false,
+                    req.body.assignmentEstimate
                 ]);
                 res.status=200;
                 const retval = ret2.rows[0];
                 res.send(retval);
             } catch (err) {
+                console.log("error was thrown ", err.message);
                 res.status=403;
                 res.send({error:err.message});
-                next(err);
             } finally {
                 finish();
             }

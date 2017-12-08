@@ -10,7 +10,7 @@ const pageModule = angular.module('postsPage', []);
  */
 pageModule.controller('allController', function($scope, $http) {
     $scope.model = {
-        assignments : [], //{title, duedate, class_name, completed, assignment_id, class_id}
+        assignments : [], //{title, duedate, class_name, completed, assignment_id, class_id, expected_hours}
         classes : [], //{class_name, class_id}
         loggedIn : false,
         selectedClass : 0,
@@ -71,6 +71,13 @@ pageModule.controller('allController', function($scope, $http) {
         });
     };
 });
+pageModule.controller('editAssignmentController', function($scope, $http) {
+    $scope.formdata = {
+        editAssignmentTitle: null,
+        editAssignmentDescription: null,
+        selectedClass: null
+    }
+});
 pageModule.controller('loginController', function($scope, $http) {
     $scope.login = function () {
         $http({
@@ -123,6 +130,7 @@ pageModule.controller('assignmentsController', function($scope, $http) {
 });
 pageModule.controller('addAssignmentController', function($scope, $http) {
     $scope.addClass = function() {
+        $scope.formdata.assignmentEstimate = $scope.formdata.assignmentEstimate > 0 ? $scope.formdata.assignmentEstimate : null
         $http({
             url:'/api/assignments',
             method:'POST',
@@ -145,7 +153,8 @@ pageModule.controller('addAssignmentController', function($scope, $http) {
         assignmentTitle:'',
         dueDate:'',
         selectedClass:null,
-        assignmentDescription:''
+        assignmentDescription:'',
+        assignmentEstimate:null
     };
     $('#dueDate').datepicker();
 });
