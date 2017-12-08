@@ -24,10 +24,15 @@
           <!--shown when logged in. contains list of assignments and modal for adding class-->
           <div ng-controller='assignmentsController' ng-switch-when='true'>
             <div class="row">
-              <div class="col-sm-6">
+              <div class="col-sm-3">
                 <em>your assignments:</em>
               </div>
-              <label for=""></label>
+              <div class="col-sm-3">
+                <label for="sortDueDate"></label>
+                <input id="sortDueDate" type="button" ng-click="sortByDueDate()" class="btn" value="sort on date">
+                <label for="sortbyClassName"></label>
+                <input id="sortbyClassName" type="button" class="btn" value="sort on class" ng-click="sortByClass()">
+              </div>
               <div class="col-sm-3">
                 <label for="show_completed_box">show completed</label>
                 <input id="show_completed_box" type="checkbox" ng-model="showCompleted">
@@ -92,14 +97,17 @@
                 <td>
                   {{prettyDate(item.duedate)}}
                 </td>
+                <td>
+                  <input type="button" class="btn" value="delete" ng-click="delAssignment($index)">
+                </td>
               </tr>
             </table>
           </div>
 
           <!--shown when not logged in. will contain a description + maybe a demo-->
           <div ng-switch-when='false'>
-            <h1>//TODO</h1>
-            <div class="alert alert-info">this will eventually contain a description</div>
+            <h1>A way to track current assignments and projects</h1>
+            <div class="alert alert-info">built on Angular, Express, and Postgres</div>
           </div>
         </div>
 

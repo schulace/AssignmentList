@@ -46,6 +46,30 @@ pageModule.controller('allController', function($scope, $http) {
     };
     $scope.populate();
     $scope.populateClasses();
+    $scope.sortByDueDate = function() {
+        $scope.model.assignments.sort((a,b) => {
+            const dateA = new Date(a.duedate);
+            const dateB = new Date(b.duedate);
+            return dateA -dateB;
+        });
+        let counter = 0;
+        while(($scope.model.assignments[0].duedate == null) && counter < $scope.model.assignments.length) {
+            //move first element to back of array
+            $scope.model.assignments.push($scope.model.assignments.shift());
+            counter ++;
+        }
+    };
+    $scope.sortByClass = function() {
+        $scope.model.assignments.sort((a,b) => {
+            if (a.class_name < b.class_name) {
+                return -1;
+            }
+            if (a.class_name > b.class_name) {
+                return 1;
+            }
+            return 0;
+        });
+    };
 });
 pageModule.controller('loginController', function($scope, $http) {
     $scope.login = function () {
@@ -144,6 +168,18 @@ pageModule.controller('assignmentController', function($scope, $http){
     };
     $scope.prettyDate = function(dateIn) {
         return prettyDate(dateIn);
+    };
+    $scope.delAssignment = function(index) {
+        const id = $scope.model.assignments[index].assignment_id;
+        $http({
+            url:'/api/assignments/' + id,
+            method: 'DELETE',
+            responseType: 'JSON'
+        }).then(function() {
+            $scope.model.assignments.splice(index, 1);
+        }, function(err) {
+            console.err(err.data.msg);
+        });
     };
 });
 pageModule.controller('profileController', function($scope, $http) {

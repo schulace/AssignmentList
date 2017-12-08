@@ -118,7 +118,7 @@ router.get('/classes', function(req, res, next) {
         }
     })();
 });
-router.delete('/classes/:id', function(req,res,next) {
+router.delete('/classes/:id', function(req,res) {
     const email = req.cookies.email;
     const class_id = req.params.id;
     console.log('email: ', email, '\nclass_id: ', class_id);
@@ -137,7 +137,31 @@ router.delete('/classes/:id', function(req,res,next) {
             } catch (err) {
                 res.status = 401;
                 res.send({id:-1});
-                next(err);
+            } finally {
+                finish();
+            }
+        })();
+    });
+});
+router.delete('/assignments/:id', function(req, res) {
+    const email = req.cookies.email;
+    const assignment_id = req.params.id;
+    console.log('email: ', email, '\nclass_id: ', assignment_id);
+    db.getClient(function(err, client, finish) {
+        (async function() {
+            try {
+                const res1 = await client.query('select user_id from users natural join assignments where email = $1 and assignment_id = $2', [email, assignment_id]);
+                if(!res1.rows[0]) {
+                    throw new Error('you don\'t take this course');
+                }
+                await client.query('delete from assignments where assignment_id=$1', [assignment_id]);
+                //use next line if you're going to end up doing things where multiple people can share an assignment and a class
+                //await client.query('delete from takes where user_id = $1 and class_id = $2', [res1.rows[0].user_id, class_id]);
+                res.status = 200;
+                res.send({id:assignment_id});
+            } catch (err) {
+                res.status = 401;
+                res.send({id:-1, msg:err.message});
             } finally {
                 finish();
             }

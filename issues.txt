@@ -2,6 +2,7 @@ bugs: adding a new class doesn't get it turned into something that shows when vi
 update on bug: when new assignment is created, it doesn't get a class id
 
 features to add:
+add time estimate to assignments
 sort by date due
 sort by class
 hover to view description
