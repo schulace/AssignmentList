@@ -70,12 +70,15 @@ pageModule.controller('allController', function($scope, $http) {
             return 0;
         });
     };
-});
-pageModule.controller('editAssignmentController', function($scope, $http) {
-    $scope.formdata = {
+    $scope.editformdata = {
         editAssignmentTitle: null,
         editAssignmentDescription: null,
         selectedClass: null
+    }
+});
+pageModule.controller('editAssignmentController', function($scope, $http) {
+    $scope.submit = function() {
+        
     }
 });
 pageModule.controller('loginController', function($scope, $http) {
@@ -143,7 +146,8 @@ pageModule.controller('addAssignmentController', function($scope, $http) {
                 class_name: $scope.formdata.selectedClass.class_name,
                 completed: false,
                 assignment_id: success.data.assignment_id,
-                class_id: success.data.class_id
+                class_id: success.data.class_id,
+                expected_hours: $scope.formdata.assignmentEstimate
             });
         }, function(err) {
             console.log('error while adding assignment ', err);
@@ -190,7 +194,24 @@ pageModule.controller('assignmentController', function($scope, $http){
             console.err(err.data.msg);
         });
     };
+    $scope.hourText = function(nm) {
+        if (nm) {
+            return "expected: " + nm + " hours";
+        }
+        return null;
+    }
+    $scope.editAssignment = function(index) {
+        $scope.editformdata.editAssignmentTitle = $scope.model.assignments[index].title,
+        $scope.editformdata.editAssignmentDescription = $scope.model.assignments[index].description
+        $scope.editformdata.selectedClass = classes.filter((clss) => {
+            clss.class_id = $scope.model.assignments[index].class_id
+        })[0].class_name;
+    }
+
+    /* $scope.editformdata = {
+    } */
 });
+
 pageModule.controller('profileController', function($scope, $http) {
     $scope.set_selected_class = function(id) {
         $scope.model.selectedClass = id == $scope.model.selectedClass ? 0 : id;

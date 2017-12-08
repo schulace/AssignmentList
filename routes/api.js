@@ -12,7 +12,7 @@ router.get('/assignments', function (req, res) {
     res.responseType = 'application/json';
     let email = req.cookies.email;
     //console.log('got request for posts: ' + JSON.stringify(req));
-    db.query('select title, duedate, completed, class_name, assignment_id, class_id from assignments natural join users natural join takes natural join classes where email=$1', [email], (err, dbres) => {
+    db.query('select title, duedate, completed, class_name, assignment_id, class_id, expected_hours from assignments natural join users natural join takes natural join classes where email=$1', [email], (err, dbres) => {
         if (err) {
             console.err(err.message);
             res.responseType = 'application/json';
@@ -191,7 +191,7 @@ router.post('/assignments', function (req, res, next) {
                 if(!res1.rows[0]) {
                     throw new Error('bad class id');
                 }
-                const ret2 = await client.query('insert into assignments(user_id, class_id, title, comment, duedate, completed, expected_hours) values($1, $2, $3, $4, $5, $6)' +
+                const ret2 = await client.query('insert into assignments(user_id, class_id, title, comment, duedate, completed, expected_hours) values($1, $2, $3, $4, $5, $6, $7)' +
                     'returning assignment_id', [
                     res1.rows[0].user_id,
                     class_id,
@@ -204,6 +204,7 @@ router.post('/assignments', function (req, res, next) {
                 res.status=200;
                 const retval = ret2.rows[0];
                 res.send(retval);
+                console.log('just sent ', retval, ' back to the client');
             } catch (err) {
                 console.log("error was thrown ", err.message);
                 res.status=403;
